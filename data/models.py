@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
 from django.db import models
 
 # Create your models here.
@@ -52,3 +52,6 @@ class DepthMarketData(models.Model):
     AskVolume5 = models.IntegerField(u'申卖量五', default=0)
     AveragePrice = models.FloatField(u'当日均价', default=0)
     ActionDay = models.CharField(u'业务日期', max_length=9, default='')
+
+    class Meta:
+        ordering = ['-TradingDay','-UpdateTime','-UpdateMillisec']
