@@ -9,7 +9,7 @@ class AccountAdmin(admin.ModelAdmin):
 
     fields = ['name','remarks','frontAddress','mdFrontAddress','brokerID','userID','password']
 
-    list_display = ['name','frontAddress','brokerID','userID']
+    list_display = ['id','name','frontAddress','brokerID','userID']
 
 admin.site.register(Account,AccountAdmin)
 

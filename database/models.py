@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
 from django.db import models
 from datetime import datetime
+import uuid
+
+
+def getBroadcastAddress():
+    ''' 获取个随机的数据广播地址 '''
+    return 'ipc///tmp/%s' % uuid.uuid1()
 
 
 class Account(models.Model):
@@ -12,15 +18,18 @@ class Account(models.Model):
     # 说明(remarks)
     remarks = models.CharField(u'说明',max_length=500)
     # 交易服务器地址(frontAddress)
-    frontAddress = models.CharField(u'交易服务器地址',max_length=100)
+    frontAddress = models.CharField(u'交易服务器地址',max_length=100,blank=True, null=True)
     # 行情服务器地址(mdFrontAddress)
-    mdFrontAddress = models.CharField(u'行情服务器地址',max_length=100)
+    mdFrontAddress = models.CharField(u'行情服务器地址',max_length=100,blank=True, null=True)
     # 代理商编号(brokerID)
-    brokerID = models.CharField(u'代理商编号',max_length=50)
+    brokerID = models.CharField(u'代理商编号',max_length=50,blank=True, null=True)
     # 用户编号(userID
-    userID = models.CharField(u'用户编号',max_length=50)
+    userID = models.CharField(u'用户编号',max_length=50,blank=True, null=True)
     # 密码(password)
-    password = models.CharField(u'密码',max_length=50)
+    password = models.CharField(u'密码',max_length=50,blank=True, null=True)
+
+    def __unicode__(self):
+        return  '<%s,%s>' % (unicode(self.id),self.name)
 
     class Meta:
         verbose_name = u'账号'
@@ -83,10 +92,15 @@ class DataCatalog(models.Model):
     # 说明(remarks)
     remarks = models.CharField(u'说明',max_length=500)
 
+    def __unicode__(self):
+        return  '<%s,%s>' % (unicode(self.id),self.name)
+
     class Meta:
         verbose_name = u'数据目录'
         verbose_name_plural = u'[04].数据目录'
         ordering = ['name']
+
+
 
 
 class DepthMarketData(models.Model):
@@ -176,7 +190,7 @@ class DataGenerator(models.Model):
     # 是否保存指标数据(saveIndexData)
     saveIndexData = models.BooleanField('是否保存指标数据',default=False)
     # 数据广播地址(broadcastAddress)
-    broadcastAddress = models.CharField(u'数据广播地址',max_length=100)
+    broadcastAddress = models.CharField(u'数据广播地址',max_length=100,default = getBroadcastAddress)
 
     class Meta:
         verbose_name = u'数据生成器'
