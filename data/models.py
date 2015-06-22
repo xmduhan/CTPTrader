@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.db import models
-
-# Create your models here.
+from datetime import datetime
 
 
 class DepthMarketData(models.Model):
@@ -55,3 +54,59 @@ class DepthMarketData(models.Model):
 
     class Meta:
         ordering = ['-TradingDay','-UpdateTime','-UpdateMillisec']
+
+
+class Account(models.Model):
+    '''
+    对应CTP的账号信息配置
+    '''
+    # 名称(name)
+    name = models.CharField(u'名称',max_length=100)
+    # 说明(remarks)
+    remarks = models.CharField(u'说明',max_length=500)
+    # 交易服务器地址(frontAddress)
+    frontAddress = models.CharField(u'交易服务器地址',max_length=100)
+    # 行情服务器地址(mdFrontAddress)
+    mdFrontAddress = models.CharField(u'行情服务器地址',max_length=100)
+    # 代理商编号(brokerID)
+    brokerID = models.CharField(u'代理商编号',max_length=50)
+    # 用户编号(userID
+    userID = models.CharField(u'用户编号',max_length=50)
+    # 密码(password)
+    password = models.CharField(u'密码',max_length=50)
+
+
+
+
+class Task(models.Model):
+    '''
+    任务是数据生成器或策略执行器的执行实例，为了逻辑清晰,一个数据生成器或策略执行器只允许有一个执行实例。
+    '''
+    # 任务类型
+    TASK_TYPE = (('DataGenerator', '数据生成器'), ('StrategyExecuter', u'策略执行器'))
+    type = models.CharField(u'任务类型', max_length=30,choices=TASK_TYPE)
+    # 对应的任务配置
+    typeRelaId = models.CharField(u'对应的任务配置',max_length=100)
+    # 名称
+    name = models.CharField(u'名称',max_length=100)
+    # 进程标识
+    pid = models.IntegerField(u'进程标识')
+    # 启动时间
+    models.DateTimeField(u'启动时间', default=datetime.now)
+    # 结束时间
+    models.DateTimeField(u'结束时间', blank=True, null=True)
+    # 任务类型
+    TASK_STATE = ( ('A', u'运行'), ('P', u'停止'))
+    state = models.CharField(u'任务类型', max_length=10,choices=TASK_STATE, default='A')
+
+
+class TaskLog(models.Model):
+    '''
+    任务的执行日志
+    '''
+    # 任务
+    task = models.ForeignKey('Task',verbose_name=u'任务')
+    # 日志时间
+    logTime = models.DateTimeField(u'日志时间', default=datetime.now)
+    # 日志信息
+    name = models.CharField(u'日志信息',max_length=1000)
