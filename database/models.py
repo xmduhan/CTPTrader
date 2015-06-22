@@ -22,6 +22,11 @@ class Account(models.Model):
     # 密码(password)
     password = models.CharField(u'密码',max_length=50)
 
+    class Meta:
+        verbose_name = u'账号'
+        verbose_name_plural = u'[01].账号'
+        ordering = ['name']
+
 
 class Task(models.Model):
     '''
@@ -44,6 +49,11 @@ class Task(models.Model):
     TASK_STATE = ( ('A', u'运行'), ('P', u'停止'))
     state = models.CharField(u'状态', max_length=10,choices=TASK_STATE, default='A')
 
+    class Meta:
+        verbose_name = u'任务'
+        verbose_name_plural = u'[02].任务'
+        ordering = ['name']
+
 
 class TaskLog(models.Model):
     '''
@@ -57,6 +67,13 @@ class TaskLog(models.Model):
     logMessage = models.CharField(u'日志信息',max_length=1000)
 
 
+    class Meta:
+        verbose_name = u'任务日志'
+        verbose_name_plural = u'[03].任务日志'
+        ordering = ['logTime']
+
+
+
 class DataCatalog(models.Model):
     '''
     数据目录
@@ -66,6 +83,10 @@ class DataCatalog(models.Model):
     # 说明(remarks)
     remarks = models.CharField(u'说明',max_length=500)
 
+    class Meta:
+        verbose_name = u'数据目录'
+        verbose_name_plural = u'[04].数据目录'
+        ordering = ['name']
 
 
 class DepthMarketData(models.Model):
@@ -124,7 +145,9 @@ class DepthMarketData(models.Model):
     ActionDay = models.CharField(u'业务日期', max_length=9, default='')
 
     class Meta:
-        ordering = ['-TradingDay','-UpdateTime','-UpdateMillisec']
+        verbose_name = u'行情数据'
+        verbose_name_plural = u'[05].行情数据'
+
 
 
 class DataGenerator(models.Model):
@@ -155,6 +178,11 @@ class DataGenerator(models.Model):
     # 数据广播地址(broadcastAddress)
     broadcastAddress = models.CharField(u'数据广播地址',max_length=100)
 
+    class Meta:
+        verbose_name = u'数据生成器'
+        verbose_name_plural = u'[06].数据生成器'
+
+
 
 class StrategyExecuter(models.Model):
     '''
@@ -181,6 +209,10 @@ class StrategyExecuter(models.Model):
     # 最大做空头寸数量(maxSellPosition)
     maxSellPosition = models.IntegerField(u'最大做多头寸数量', default=1)
 
+    class Meta:
+        verbose_name = u'策略执行器'
+        verbose_name_plural = u'[07].策略执行器'
+
 
 class TradingRecord(models.Model):
     '''
@@ -190,7 +222,7 @@ class TradingRecord(models.Model):
     task = models.ForeignKey('Task',verbose_name=u'任务')
     # 策略执行器(strategyExecuter)
     strategyExecuter = models.ForeignKey('StrategyExecuter',verbose_name=u'策略执行器')
-    # 头寸标识(positionId)
+    # 头寸标识(positionId) TODO 可否直接使用TradingRecord的id
     # 品种(instrumentID)
     instrumentID = models.CharField(u'品种',max_length=50)
     # 交易方向(tradingDirection)
@@ -198,10 +230,19 @@ class TradingRecord(models.Model):
     tradingDirection = models.CharField(u'交易方向', max_length=30,choices=TRADING_DIRECTION)
     # 交易数量(volume)
     volume = models.FloatField(u'交易数量')
+    # 开仓时间(openTime)
+    openTime = models.DateTimeField(u'开仓时间')
     # 开仓价格(openPrice)
     openPrice = models.FloatField(u'开仓价格')
+    # 平仓时间(closeTime)
+    closeTime = models.DateTimeField(u'平仓时间',blank=True, null=True)
     # 平仓价格(closePrice)
-    closePrice = models.FloatField(u'平仓价格')
+    closePrice = models.FloatField(u'平仓价格',blank=True, null=True)
     # 状态(state)
-    TRADING_STATE = (('Open',u'开仓'),('Close',u'平仓'))
+    TRADING_STATE = (('Preopen','预建单'),('Open',u'开仓'),('Close',u'平仓'))
     state = models.CharField(u'状态', max_length=30,choices=TRADING_STATE)
+
+    class Meta:
+        verbose_name = u'交易记录'
+        verbose_name_plural = u'[08].交易记录'
+        ordering = ['openTime','closeTime']
