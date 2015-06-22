@@ -184,11 +184,11 @@ class DataGenerator(models.Model):
     # 品种列表(instrumentIDList)
     instrumentIDList = models.CharField(u'品种列表',max_length=500)
     # 是否保存原始数据流(saveRawData)
-    saveRawData = models.BooleanField('是否保存原始数据流',default=False)
+    saveRawData = models.BooleanField(u'是否保存原始数据流',default=False)
     # 是否保存棒线数据(saveBarData)
-    saveBarData = models.BooleanField('是否保存棒线数据',default=False)
+    saveBarData = models.BooleanField(u'是否保存棒线数据',default=False)
     # 是否保存指标数据(saveIndexData)
-    saveIndexData = models.BooleanField('是否保存指标数据',default=False)
+    saveIndexData = models.BooleanField(u'是否保存指标数据',default=False)
     # 数据广播地址(broadcastAddress)
     broadcastAddress = models.CharField(u'数据广播地址',max_length=100,default = getBroadcastAddress)
 
@@ -222,6 +222,8 @@ class StrategyExecuter(models.Model):
     maxBuyPosition = models.IntegerField(u'最大做多头寸数量', default=1)
     # 最大做空头寸数量(maxSellPosition)
     maxSellPosition = models.IntegerField(u'最大做多头寸数量', default=1)
+    # 是否模拟交易(simulate)
+    simulate = models.BooleanField(u'是否模拟交易',default=True)
 
     class Meta:
         verbose_name = u'策略执行器'
@@ -236,6 +238,8 @@ class TradingRecord(models.Model):
     task = models.ForeignKey('Task',verbose_name=u'任务')
     # 策略执行器(strategyExecuter)
     strategyExecuter = models.ForeignKey('StrategyExecuter',verbose_name=u'策略执行器')
+    # 是否模拟交易(simulate)
+    simulate = models.BooleanField(u'是否模拟交易',default=True)
     # 头寸标识(positionId) TODO 可否直接使用TradingRecord的id
     # 品种(instrumentID)
     instrumentID = models.CharField(u'品种',max_length=50)

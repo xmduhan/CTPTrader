@@ -94,9 +94,9 @@ class StrategyExecuterAdmin(admin.ModelAdmin):
 
     fields = ['name','account','strategyDir','strategyProgram','strategyConfig',\
     'receiveAddress',    'instrumentIDList','volume','maxBuyPosition',\
-    'maxSellPosition']
+    'maxSellPosition','simulate']
 
-    list_display = ['name','account','receiveAddress','instrumentIDList']
+    list_display = ['name','account','receiveAddress','instrumentIDList','simulate']
 
     #list_filter = []
 
@@ -107,11 +107,11 @@ class TradingRecordAdmin(admin.ModelAdmin):
     ''' '''
 
     fields = ['task','strategyExecuter','instrumentID','tradingDirection','volume',\
-    'openPrice','closePrice','state']
+    'openPrice','closePrice','state','simulate']
 
     list_display = ['task','strategyExecuter','instrumentID','tradingDirection',\
-        'openPrice','closePrice','volume','state']
+        'openPrice','closePrice','volume','state','simulate']
 
-    list_filter = ['state','tradingDirection','instrumentID','strategyExecuter']
+    list_filter = ['state','tradingDirection','instrumentID','strategyExecuter','simulate']
 
 admin.site.register(TradingRecord,TradingRecordAdmin)
