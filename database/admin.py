@@ -11,7 +11,7 @@ class AccountAdmin(admin.ModelAdmin):
 
     list_display = ['id','name','frontAddress','brokerID','userID']
 
-admin.site.register(Account,AccountAdmin)
+admin.site.register(ModelAccount,AccountAdmin)
 
 
 class TaskAdmin(admin.ModelAdmin):
@@ -23,7 +23,7 @@ class TaskAdmin(admin.ModelAdmin):
 
     list_filter = ['state']
 
-admin.site.register(Task,TaskAdmin)
+admin.site.register(ModelTask,TaskAdmin)
 
 
 class TaskLogAdmin(admin.ModelAdmin):
@@ -35,7 +35,7 @@ class TaskLogAdmin(admin.ModelAdmin):
 
     list_filter = ['task']
 
-admin.site.register(TaskLog,TaskLogAdmin)
+admin.site.register(ModelTaskLog,TaskLogAdmin)
 
 
 class DataCatalogAdmin(admin.ModelAdmin):
@@ -47,7 +47,7 @@ class DataCatalogAdmin(admin.ModelAdmin):
 
     #list_filter = []
 
-admin.site.register(DataCatalog,DataCatalogAdmin)
+admin.site.register(ModelDataCatalog,DataCatalogAdmin)
 
 
 
@@ -73,7 +73,7 @@ class DepthMarketDataAdmin(admin.ModelAdmin):
 
     date_hierarchy = 'dataTime'
 
-admin.site.register(DepthMarketData,DepthMarketDataAdmin)
+admin.site.register(ModelDepthMarketData,DepthMarketDataAdmin)
 
 
 class DataGeneratorAdmin(admin.ModelAdmin):
@@ -86,7 +86,7 @@ class DataGeneratorAdmin(admin.ModelAdmin):
 
     list_filter = ['account']
 
-admin.site.register(DataGenerator,DataGeneratorAdmin)
+admin.site.register(ModelDataGenerator,DataGeneratorAdmin)
 
 
 class StrategyExecuterAdmin(admin.ModelAdmin):
@@ -100,7 +100,7 @@ class StrategyExecuterAdmin(admin.ModelAdmin):
 
     #list_filter = []
 
-admin.site.register(StrategyExecuter,StrategyExecuterAdmin)
+admin.site.register(ModelStrategyExecuter,StrategyExecuterAdmin)
 
 
 class TradingRecordAdmin(admin.ModelAdmin):
@@ -114,4 +114,4 @@ class TradingRecordAdmin(admin.ModelAdmin):
 
     list_filter = ['state','tradingDirection','instrumentID','strategyExecuter','simulate']
 
-admin.site.register(TradingRecord,TradingRecordAdmin)
+admin.site.register(ModelTradingRecord,TradingRecordAdmin)

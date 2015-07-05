@@ -9,7 +9,7 @@ def getBroadcastAddress():
     return 'ipc///tmp/%s' % uuid.uuid1()
 
 
-class Account(models.Model):
+class ModelAccount(models.Model):
     '''
     对应CTP的账号信息配置
     '''
@@ -37,7 +37,7 @@ class Account(models.Model):
         ordering = ['name']
 
 
-class Task(models.Model):
+class ModelTask(models.Model):
     '''
     任务是数据生成器或策略执行器的执行实例，为了逻辑清晰,一个数据生成器或策略执行器只允许有一个执行实例。
     '''
@@ -64,12 +64,12 @@ class Task(models.Model):
         ordering = ['name']
 
 
-class TaskLog(models.Model):
+class ModelTaskLog(models.Model):
     '''
     任务的执行日志
     '''
-    # 任务(Task)
-    task = models.ForeignKey('Task',verbose_name=u'任务')
+    # 任务(task)
+    task = models.ForeignKey('ModelTask',verbose_name=u'任务')
     # 日志时间(logTime)
     logTime = models.DateTimeField(u'日志时间', default=datetime.now)
     # 日志信息(logMessage)
@@ -82,8 +82,7 @@ class TaskLog(models.Model):
         ordering = ['logTime']
 
 
-
-class DataCatalog(models.Model):
+class ModelDataCatalog(models.Model):
     '''
     数据目录
     '''
@@ -101,14 +100,12 @@ class DataCatalog(models.Model):
         ordering = ['name']
 
 
-
-
-class DepthMarketData(models.Model):
+class ModelDepthMarketData(models.Model):
     '''
     深度行情数据存储(对应CTP数据结构CThostFtdcDepthMarketDataField)
     '''
     # 所属的目录(catalog)
-    dataCatalog = models.ForeignKey('DataCatalog',verbose_name=u'所属数据目录')
+    dataCatalog = models.ForeignKey('ModelDataCatalog',verbose_name=u'所属数据目录')
     # 数据时间(相当于TradingDay+UpdateTime+UpdateMillisec)
     dataTime = models.DateTimeField(u'数据时间')
 
@@ -163,17 +160,16 @@ class DepthMarketData(models.Model):
         verbose_name_plural = u'[05].行情数据'
 
 
-
-class DataGenerator(models.Model):
+class ModelDataGenerator(models.Model):
     '''
     数据生成器配置
     '''
     # 名称(name)
     name = models.CharField(u'名称',max_length=100)
     # 账号(account)
-    account = models.ForeignKey('Account',verbose_name=u'账号')
+    account = models.ForeignKey('ModelAccount',verbose_name=u'账号')
     # 所属的目录(dataCatalog)
-    dataCatalog = models.ForeignKey('DataCatalog',verbose_name=u'所属数据目录')
+    dataCatalog = models.ForeignKey('ModelDataCatalog',verbose_name=u'所属数据目录')
     # 数据源(dataSource)
     DATA_SOURCE_TYPE = (('Channel',u'CTP接口'),('Database',u'数据库'))
     dataSource = models.CharField(u'数据源', max_length=30,choices=DATA_SOURCE_TYPE)
@@ -181,8 +177,8 @@ class DataGenerator(models.Model):
     datetimeBegin = models.DateTimeField(u'数据起始时间',blank=True, null=True)
     # 数据结束时间(datetimeEnd)
     datetimeEnd = models.DateTimeField(u'数据结束时间',blank=True, null=True)
-    # 品种列表(instrumentIDList)
-    instrumentIDList = models.CharField(u'品种列表',max_length=500)
+    # 品种列表(instrumentIdList) json数据格式
+    instrumentIdList = models.CharField(u'品种列表',max_length=500)
     # 是否保存原始数据流(saveRawData)
     saveRawData = models.BooleanField(u'是否保存原始数据流',default=False)
     # 是否保存棒线数据(saveBarData)
@@ -197,15 +193,14 @@ class DataGenerator(models.Model):
         verbose_name_plural = u'[06].数据生成器'
 
 
-
-class StrategyExecuter(models.Model):
+class ModelStrategyExecuter(models.Model):
     '''
     策略执行器
     '''
     # 名称(name)
     name = models.CharField(u'名称',max_length=100)
     # 账号(account)
-    account = models.ForeignKey('Account',verbose_name=u'账号')
+    account = models.ForeignKey('ModelAccount',verbose_name=u'账号')
     # 策略程序所在目录(strategyDir)
     strategyDir = models.CharField(u'策略程序所在目录',max_length=500)
     # 策略程序名称(strategyProgram)
@@ -214,8 +209,8 @@ class StrategyExecuter(models.Model):
     strategyConfig = models.CharField(u'策略配置文件',max_length=100)
     # 数据接收地址(receiveAddress)
     receiveAddress = models.CharField(u'数据接收地址',max_length=100)
-    # 品种列表(instrumentIDList)
-    instrumentIDList = models.CharField(u'品种列表',max_length=500)
+    # 品种列表(instrumentIdList)
+    instrumentIdList = models.CharField(u'品种列表',max_length=500)
     # 默认头寸大小(volume)
     volume = models.FloatField(u'默认头寸大小', default=1)
     # 最大做多头寸数量(maxBuyPosition)
@@ -230,14 +225,14 @@ class StrategyExecuter(models.Model):
         verbose_name_plural = u'[07].策略执行器'
 
 
-class TradingRecord(models.Model):
+class ModelTradingRecord(models.Model):
     '''
     交易记录
     '''
     # 任务(task)
-    task = models.ForeignKey('Task',verbose_name=u'任务')
+    task = models.ForeignKey('ModelTask',verbose_name=u'任务')
     # 策略执行器(strategyExecuter)
-    strategyExecuter = models.ForeignKey('StrategyExecuter',verbose_name=u'策略执行器')
+    strategyExecuter = models.ForeignKey('ModelStrategyExecuter',verbose_name=u'策略执行器')
     # 是否模拟交易(simulate)
     simulate = models.BooleanField(u'是否模拟交易',default=True)
     # 头寸标识(positionId) TODO 可否直接使用TradingRecord的id

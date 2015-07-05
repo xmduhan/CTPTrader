@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 #%% 已完成
-1、为DepthMarketData增加admin修改界面(ok)
+1、为ModelDepthMarketData增加admin修改界面(ok)
 1、编写脚本讲ctp数据流保存到数据库(ok)
 1、删除config app,删除data改为database（ok）
 (本质上这个不是一个django应用只是需要用到部分django的功能,所以把数据模块定义割裂开来似乎没有必要)
@@ -26,11 +26,11 @@ sys.path.append(path)
 os.chdir(path)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", settings)
 
-#%% 
+#%%
 from django_pandas.io import read_frame
-from data.models import DepthMarketData
+from data.models import ModelDepthMarketData
 from pandas.io.excel import ExcelWriter
-qs = DepthMarketData.objects.all()
+qs = ModelDepthMarketData.objects.all()
 df = read_frame(qs)
 df = df[['InstrumentID', 'AskPrice1','AskVolume1','BidPrice1','BidVolume1','TradingDay','UpdateTime','UpdateMillisec','Volume','Turnover']]
 writer = ExcelWriter('/tmp/output.xls')
@@ -45,7 +45,7 @@ InstrumentData = {}
 for i in InstrumentIDList:
     InstrumentData[i] = df[df.InstrumentID==i].reset_index()
     InstrumentData[i][i] = InstrumentData[i].BidPrice1
-    InstrumentData[i]= InstrumentData[i][[i,'TradingDay','UpdateTime','UpdateMillisec']]    
+    InstrumentData[i]= InstrumentData[i][[i,'TradingDay','UpdateTime','UpdateMillisec']]
 
 
 InstrumentData[InstrumentData.keys()[0]].head()
@@ -64,3 +64,5 @@ resultData.head(5)
 writer = ExcelWriter('/tmp/output.xls')
 resultData.to_excel(writer)
 writer.save()
+
+

@@ -6,7 +6,7 @@ setDjangoEnvironment()
 import os
 from pyctp.CTPChannel import MdChannel
 from datetime import datetime
-from database.models import DepthMarketData
+from database.models import ModelDepthMarketData
 from dateutil.relativedelta import relativedelta
 
 
@@ -26,7 +26,7 @@ i = 0
 while True:
     result = mdChannel.readMarketData(1000)
     if result:
-        DepthMarketData(**result.toDict()).save()
+        ModelDepthMarketData(**result.toDict()).save()
         i += 1
         print u'成功第%d条数据' % i
     else:
