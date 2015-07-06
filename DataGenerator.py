@@ -33,21 +33,21 @@ class DataGenerator(object):
         self.socket = socket
 
 
-    def dataIterator():
+    def dataIterator(self):
         '''
         生成数据迭代器
         '''
         raise Exception(u'方法未实现')
 
 
-    def sendMessage(message):
+    def sendMessage(self,message):
         '''
         发送消息
         '''
         self.socket.send_multipart(message)
 
 
-    def frameProcess(rawMarketData):
+    def frameProcess(self,rawMarketData):
         '''
         处理一帧数据
         '''
@@ -84,7 +84,7 @@ class DataGenerator(object):
             depthMarketData.save()
 
 
-    def generate():
+    def generate(self):
         '''
         循环生成数据
         '''
@@ -99,7 +99,7 @@ class CTPChannelGenerator(DataGenerator):
     从CTP接口读取行情数据并转换成交易信号
     '''
 
-    def dataIterator():
+    def dataIterator(self):
         '''
         从CTP接口读取数据
         '''
@@ -133,7 +133,7 @@ class DatabaseGenerator(DataGenerator):
         self.datetimeBegin = modelDataGenerator.datetimeBegin
         self.datatimeEnd = modelDataGenerator.datetimeEnd
 
-    def dataIterator():
+    def dataIterator(self):
         '''
         从数据库读取行情数据
         '''
