@@ -164,11 +164,6 @@ def generateFromCTPChannel(dataGenerator):
     instrumentIdList = json.loads(dataGenerator.instrumentIdList)
 
     print '-----1--------'
-    print 'account.mdFrontAddress =',account.mdFrontAddress
-    print 'account.brokerID =',account.brokerID
-    print 'account.userID =',account.userID
-    print 'account.password =',account.password
-    print 'instrumentIdList =',instrumentIdList
 
     # 创建一个CTP MD通道
     mdChannel = MdChannel(
@@ -180,12 +175,15 @@ def generateFromCTPChannel(dataGenerator):
     )
 
     print '------2------'
+    print 'dataGenerator.broadcastAddress=',dataGenerator.broadcastAddress
+
 
     # 创建zmq行情发布管道
     context = zmq.Context()
     socket = context.socket(zmq.PUB)
     socket.bind(dataGenerator.broadcastAddress)
 
+    print '------3------'
 
     # 循环读取报价信息
     while True:
