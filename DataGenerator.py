@@ -115,6 +115,8 @@ class CTPChannelGenerator(DataGenerator):
         # 从CTP接口读取数据
         while True:
             rawMarketData = mdChannel.readMarketData()
+            if rawMarketData == None:
+                continue
             yield rawMarketData
 
 
@@ -148,113 +150,6 @@ class DatabaseGenerator(DataGenerator):
 
 
 
-
-def generateFromCTPChannel(dataGenerator):
-    '''
-    从CTP接口读取行情数据并转换成交易信号
-
-    '''
-
-    #读取账户信息
-    account = dataGenerator.account
-    saveRawData = dataGenerator.saveRawData
-    dataCatalog = dataGenerator.dataCatalog
-
-    # 读取要订阅的品种列表
-    instrumentIdList = json.loads(dataGenerator.instrumentIdList)
-
-    print '-----1--------'
-
-    # 创建一个CTP MD通道
-    mdChannel = MdChannel(
-        frontAddress = account.mdFrontAddress,
-        brokerID = account.brokerID,
-        userID = account.userID,
-        password = account.password,
-        instrumentIdList = instrumentIdList
-    )
-
-    print '------2------'
-    print 'dataGenerator.broadcastAddress=',dataGenerator.broadcastAddress
-
-
-    # 创建zmq行情发布管道
-    context = zmq.Context()
-    socket = context.socket(zmq.PUB)
-    socket.bind(dataGenerator.broadcastAddress)
-
-    print '------3------'
-
-    # 循环读取报价信息
-    while True:
-        rawMarketData = mdChannel.readMarketData()
-        #print data
-
-        # 读取交易品种标识
-        instrumentId = rawMarketData['InstrumentId']
-
-        # 读取关键信息报价
-        marketData = {}
-        marketData['ask'] = rawMarketData['AskPrice1']
-        marketData['bid'] = rawMarketData['BidPrice1']
-        marketData['askVolume'] = rawMarketData['AskVolume1']
-        marketData['bidVolume'] = rawMarketData['BidVolume1']
-
-        # 处理交易时间
-        tradingDay = rawMarketData['TradingDay']
-        updateTime = rawMarketData['UpdateTime']
-        updateMillisec = rawMarketData['UpdateMillisec']
-        timeString = "%s %s %6id" % (tradingDay,updateTime,int(updateMillisec)*1000)
-        timeFormat = u'%Y%m%d %H:%M:%S %f'
-        marketData['timeString'] = timeString
-        marketData['timeFormat'] = timeFormat
-
-        # 发送行情广播消息
-        # 消息格式:[品种编号(InstrumentID),报价数据(MarketData),棒线数据(BarData),指标数据(IndexData)]
-        marketDataJson = json.dumps(marketData)
-        message = [instrumentId,marketDataJson,'','']
-        socket.send_multipart(message)
-
-        # 保存原始行情数据到数据库
-        if saveRawData == True:
-            depthMarketData.dataCatalog = dataCatalog
-            depthMarketData.dataTime = datetime.strptime(timeString,timeFormat)
-            depthMarketData = ModelDepthMarketData(**rawMarketData)
-            depthMarketData.save()
-
-
-
-def generateFromDatabase(dataGenerator):
-    '''
-    从数据读取原始行情数据并转换成交易信号
-    '''
-
-    # 创建zmq行情发布管道
-    context = zmq.Context()
-    socket = context.socket(zmq.PUB)
-    socket.bind(dataGenerator.broadcastAddress)
-
-    # 设定数据查询条件
-    instrumentIdList = dataGenerator.instrumentIdList
-    datetimeBegin = dataGenerator.datetimeBegin
-    datetimeEnd = dataGenerator.datetimeEnd
-    dataCatalog = dataGenerator.dataCatalog
-    querySet = ModelDepthMarketData.objects.filter(dataCatalog=dataCatalog)
-    querySet = querySet.filter(InstrumentID__in=instrumentIdList)
-    if datetimeBegin :
-        querySet = querySet.filter(dataTime__gte=datetimeBegin)
-    if datetimeEnd :
-        querySet = querySet.filter(dataTime__lt=datetimeEnd)
-
-    # 循环读取并处理数据库数据
-    for rawMarketData in querySet:
-        pass
-
-
-
-
-
-
 def main():
     '''
     数据生成器主过程
@@ -276,15 +171,14 @@ def main():
     dataSource = dataGenerator.dataSource
 
     if dataSource == 'Channel':
-        generateFromCTPChannel(dataGenerator)
+        generator = CTPChannelGenerator(dataGenerator)
+        generator.generate()
+        return
 
-    elif dataSource == 'Database':
-        generateFromDatabase(dataGenerator)
-
-    else:
-        raise Exception(u'未知数据源类型')
-
-
+    if dataSource == 'Database':
+        generator = DatabaseGenerator(dataGenerator)
+        generator.generate()
+        return
 
 
 if __name__ == '__main__':
