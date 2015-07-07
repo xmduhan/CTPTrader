@@ -6,7 +6,7 @@ import uuid
 
 def getBroadcastAddress():
     ''' 获取个随机的数据广播地址 '''
-    return 'ipc///tmp/%s' % uuid.uuid1()
+    return 'ipc:///tmp/%s' % uuid.uuid1()
 
 
 class ModelAccount(models.Model):
