@@ -80,7 +80,7 @@ class DataGeneratorAdmin(admin.ModelAdmin):
     ''' '''
 
     fields = ['name','account','dataCatalog','dataSource','datetimeBegin','datetimeEnd',\
-        'instrumentIdList','saveRawData','saveBarData','saveIndexData','broadcastAddress']
+        'instrumentIdList','saveRawData','saveBarData','saveIndexData','broadcastAddress','interval']
 
     list_display = ['id','name','account','dataCatalog','dataSource','broadcastAddress']
 

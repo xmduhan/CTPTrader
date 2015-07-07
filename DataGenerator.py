@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import division
 from comhelper import setDjangoEnvironment
 setDjangoEnvironment()
 from database.models import *
@@ -148,6 +149,18 @@ class DatabaseGenerator(DataGenerator):
         super(DatabaseGenerator,self).__init__(modelDataGenerator)
         self.datetimeBegin = modelDataGenerator.datetimeBegin
         self.datetimeEnd = modelDataGenerator.datetimeEnd
+        self.interval = modelDataGenerator.interval
+
+    def waitInterval(self):
+        '''
+        等待时间间隔
+        '''
+        if self.interval:
+            interval = self.interval
+        else:
+            interval = .5 / len(self.instrumentIdList)
+        time.sleep(interval)
+
 
     def dataIterator(self):
         '''
@@ -160,10 +173,11 @@ class DatabaseGenerator(DataGenerator):
             querySet = querySet.filter(dataTime__gte=self.datetimeBegin)
         if self.datetimeEnd :
             querySet = querySet.filter(dataTime__lt=self.datetimeEnd)
+        querySet = querySet.order_by('dataTime')
 
         for rawMarketData in querySet:
             yield rawMarketData.__dict__
-            time.sleep(1)
+            self.waitInterval()
 
 
 

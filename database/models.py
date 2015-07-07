@@ -187,6 +187,8 @@ class ModelDataGenerator(models.Model):
     saveIndexData = models.BooleanField(u'是否保存指标数据',default=False)
     # 数据广播地址(broadcastAddress)
     broadcastAddress = models.CharField(u'数据广播地址',max_length=100,default = getBroadcastAddress)
+    # 数据生成间隔时间(interval) 以秒为单位
+    interval = models.FloatField(u'数据生成间隔时间',blank=True, null=True)
 
     class Meta:
         verbose_name = u'数据生成器'
