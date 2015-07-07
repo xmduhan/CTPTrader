@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
-
+import django
 
 def getProjectPath():
     fullpath = os.path.abspath(__file__)
@@ -12,3 +12,4 @@ def setDjangoEnvironment():
     os.chdir(getProjectPath())
     settings = "CTPTrader.settings"
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", settings)
+    django.setup()
