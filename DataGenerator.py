@@ -155,10 +155,7 @@ class DatabaseGenerator(DataGenerator):
         '''
         等待时间间隔
         '''
-        if self.interval:
-            interval = self.interval
-        else:
-            interval = .5 / len(self.instrumentIdList)
+        interval = (self.interval or .5) / len(self.instrumentIdList)
         time.sleep(interval)
 
 
