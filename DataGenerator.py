@@ -6,6 +6,7 @@ from database.models import *
 import sys
 import json
 import zmq
+import time
 from pyctp.CTPChannel import MdChannel
 
 
@@ -32,6 +33,9 @@ class DataGenerator(object):
         socket.bind(self.broadcastAddress)
         self.socket = socket
 
+        #
+        self.sendMessageCount = 0
+
 
     def dataIterator(self):
         '''
@@ -44,7 +48,9 @@ class DataGenerator(object):
         '''
         发送消息
         '''
+        message = [ p.encode('utf-8') if type(p) == unicode else p  for p in message ]
         self.socket.send_multipart(message)
+        self.sendMessageCount += 1
 
 
     def frameProcess(self,rawMarketData):
@@ -52,7 +58,7 @@ class DataGenerator(object):
         处理一帧数据
         '''
         # 读取交易品种标识
-        instrumentId = rawMarketData['InstrumentId']
+        instrumentId = rawMarketData['InstrumentID']
 
         # 读取关键信息报价
         marketData = {}
@@ -65,7 +71,7 @@ class DataGenerator(object):
         tradingDay = rawMarketData['TradingDay']
         updateTime = rawMarketData['UpdateTime']
         updateMillisec = rawMarketData['UpdateMillisec']
-        timeString = "%s %s %6id" % (tradingDay,updateTime,int(updateMillisec)*1000)
+        timeString = "%s %s %6d" % (tradingDay,updateTime,int(updateMillisec)*1000)
         timeFormat = u'%Y%m%d %H:%M:%S %f'
         marketData['timeString'] = timeString
         marketData['timeFormat'] = timeFormat
@@ -88,9 +94,19 @@ class DataGenerator(object):
         '''
         循环生成数据
         '''
-        for rawMarketData in dataIterator():
+        print u'开始生成交易信号...'
+        lastSendMessageCount = 0
+        t0 = datetime.now()
+        for rawMarketData in self.dataIterator():
             self.frameProcess(rawMarketData)
-
+            t1 = datetime.now()
+            dt = t1 - t0
+            dts = dt.total_seconds()
+            if dts >= 1:
+                thisSendMessageCount = self.sendMessageCount - lastSendMessageCount
+                print u'发送%d条交易信号.' % thisSendMessageCount
+                t0 = t1
+                lastSendMessageCount = self.sendMessageCount
 
 
 
@@ -117,7 +133,7 @@ class CTPChannelGenerator(DataGenerator):
             rawMarketData = mdChannel.readMarketData()
             if rawMarketData == None:
                 continue
-            yield rawMarketData
+            yield rawMarketData.__dict__
 
 
 class DatabaseGenerator(DataGenerator):
@@ -129,9 +145,9 @@ class DatabaseGenerator(DataGenerator):
         '''
         构造函数
         '''
-        super(DataGenerator,self).__init__()
+        super(DatabaseGenerator,self).__init__(modelDataGenerator)
         self.datetimeBegin = modelDataGenerator.datetimeBegin
-        self.datatimeEnd = modelDataGenerator.datetimeEnd
+        self.datetimeEnd = modelDataGenerator.datetimeEnd
 
     def dataIterator(self):
         '''
@@ -147,6 +163,7 @@ class DatabaseGenerator(DataGenerator):
 
         for rawMarketData in querySet:
             yield rawMarketData.__dict__
+            time.sleep(1)
 
 
 
