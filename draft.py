@@ -66,3 +66,13 @@ resultData.to_excel(writer)
 writer.save()
 
 
+#%%  动态载入模块
+import os
+os.chdir('/home/duhan/github/CTPTrader')
+
+modules = map(__import__,)
+
+
+
+
+

@@ -92,11 +92,11 @@ admin.site.register(ModelDataGenerator,DataGeneratorAdmin)
 class StrategyExecuterAdmin(admin.ModelAdmin):
     ''' '''
 
-    fields = ['id','name','account','strategyDir','strategyProgram','strategyConfig',\
+    fields = ['name','account','strategyDir','strategyProgram','strategyConfig',\
     'receiveAddress',    'instrumentIdList','volume','maxBuyPosition',\
     'maxSellPosition','simulate']
 
-    list_display = ['name','account','receiveAddress','instrumentIdList','simulate']
+    list_display = ['id','name','account','receiveAddress','instrumentIdList','simulate']
 
     #list_filter = []
 
