@@ -69,8 +69,12 @@ writer.save()
 #%%  动态载入模块
 import os
 os.chdir('/home/duhan/github/CTPTrader')
+path = 'strategies/sample'
+filename = 'sample.py'
+fullFilePath = os.path.join(path,filename)
 
-modules = map(__import__,)
+import imp
+model = imp.load_source(filename, fullFilePath)
 
 
 
