@@ -6,12 +6,17 @@ from database.models import *
 from datetime import datetime
 from pyctp.CTPChannel import CThostFtdcInputOrderField
 
+
+UnkownPositionDirection = [-3000,u'未知头寸方向',None]
+PositionNotExists = [-3001,u'头寸不存在',None]
+PositionNotInOpenState = [-3002,u'头寸不处于打开状态',None]
+
 class Trader(object):
     '''
     交易处理类
     '''
 
-    def __init__(traderChannel,task=None,strategyExecuter=None,simulate=False):
+    def __init__(self,traderChannel,task=None,strategyExecuter=None,simulate=False):
         '''
         构造函数
         traderChannel CTP Trader 交易通道的实例
@@ -25,7 +30,7 @@ class Trader(object):
         self.userID = traderChannel.userID
 
 
-    def orderInsert(orderRef,instrumentId,orderPriceType = '1',direction = '0',combOffsetFlag = '0',
+    def orderInsert(self,orderRef,instrumentId,orderPriceType = '1',direction = '0',combOffsetFlag = '0',
             combHedgeFlag = '1',limitPrice = 0,volumeTotalOriginal = 1,timeCondition = '1',gTDDate = '',
             volumeCondition = '1',minVolume = None,contingentCondition = '1',stopPrice = 0,forceCloseReason = '0',
             isAutoSuspend = 0,businessUnit = '',requestID = 1,userForceClose = 0,isSwapOrder = 0):
@@ -148,10 +153,19 @@ class Trader(object):
         return result
 
 
-    def openPosition(instrumentId,direction,volume):
+    def openPosition(self,instrumentId,directionCode,volume=None):
         '''
         创建头寸
         '''
+
+        # 转换头寸方向参数
+        if directionCode == 'buy' :
+            direction = '0'
+        elif directionCode == 'sell':
+            direction = '1'
+        else:
+            return UnkownPositionDirection
+
         # 创建一条预开单记录
         tradingRecord = ModelTradingRecord()
         tradingRecord.task = self.task
@@ -164,23 +178,169 @@ class Trader(object):
         tradingRecord.state =  'preopen'
         tradingRecord.save()
 
+        # 发送建单请求
+        errorId,errorMsg,data = self.orderInsert(
+            instrumentId=instrumentId,
+            direction=direction,
+            combOffsetFlag='0',     #开仓
+            volume=volume or self.volume
+        )
 
-        # 创建头寸
+        if errorId == 0 :
+            tradingRecord.state = 'open'
+            tradingRecord.openPrice = data[0].Price
+            tradingRecord.save()
+            # 返回成功
+            return 0,u'',tradingRecord
+        else:
+            tradingRecord.lastErrorID = errorId
+            tradingRecord.lastErrorMsg = lastErrorMsg
+            tradingRecord.save()
+            return errorId,lastErrorMsg,None
+
+
+    def closePostion(self,tradingRecordId):
+        '''
+        关闭头寸  估计还是智能根据tradingRecordId来平仓
+        '''
+        # 读取ModelTradingRecord记录
+        try:
+            tradingRecord = ModelTradingRecord.objects.get(id=tradingRecordId)
+        except:
+            return PositionNotExists
+
+        # 检查头寸是否处于打开状态
+        if tradingRecord.state not in ('open','preclose'):
+            return PositionNotInOpenState
+
+        # 将头寸状态改为正在关闭
+        tradingRecord.state = 'preclose'
+        tradingRecord.save()
+
+        # 转换头寸方向参数
+        # NOTE:注意平仓时交易方向是相反的
+        if tradingRecord.direction == 'buy' :
+            direction = '1'     # sell
+        elif tradingRecord.direction  == 'sell':
+            direction = '0'     # buy
+        else:
+            return UnkownPositionDirection
+
+        # 发送建单请求
+        errorId,errorMsg,data = self.orderInsert(
+            instrumentId=instrumentId,
+            direction=direction,
+            combOffsetFlag = '1',     #开仓
+            volume=tradingRecord.volume
+        )
+
+        # 返回平仓结果
+        if errorId == 0 :
+            tradingRecord.state = 'close'
+            tradingRecord.closePrice = data[0].Price
+            tradingRecord.save()
+            # 返回成功
+            return 0,u'',tradingRecord
+        else:
+            tradingRecord.lastErrorID = errorId
+            tradingRecord.lastErrorMsg = lastErrorMsg
+            tradingRecord.save()
+            return errorId,lastErrorMsg,None
+
+
+    def closeAllPosition(self,instrumentIdList=None,directionCode=None):
+        '''
+        关闭满足条件的所有头寸
+        instrumentIdList 要平仓的品种列表
+        directionCode 要平仓的交易方向
+        返回格式:
+        如果成功返回:[0,[关闭成功的头寸对应的ModelTradingRecord对象],[]]
+        如果失败返回:[关闭失败的数量,[关闭成功的头寸对应的ModelTradingRecord对象],[失败的头寸对应的ModelTradingRecord对象]]
+        '''
+        # 设置查询条件
+        querySet = self.getPostionQuerySet()
+        querySet = querySet.filter(state__in=['open','preclose'])
+        if instrumentIdList :
+            querySet = querySet.filter(instrumentID__in=instrumentIdList)
+        if directionCode :
+            querySet = querySet.filter(direction=directionCode)
+
+        # 循环调用关闭头寸过程
+        failCount = 0
+        failList = []
+        successList = []
+        for tradingRecord in querySet:
+            errorId,errorMsg,data = self.closePostion(tradingRecord.id)
+            if errorId == 0 :
+                successList.append(tradingRecord)
+            else:
+                failCount += 1
+                failList.append(tradingRecord)
+
+        # 返回处理结果
+        return failCount,successList,failList
+
+
+    def closePositonByVolume(self):
+        '''
+        指定手数手数关闭头寸(暂不是实现,这个比较有难度)
+        '''
+        pass
+
+
+    def getPostionVolume(self,instrumentIdList=None,directionCode=None):
+        '''
+        获取头寸手数
+        '''
+        # 设置查询条件
+        querySet = self.getPostionQuerySet()
+        querySet = querySet.filter(state__in=['open','preclose'])
+        if instrumentIdList :
+            querySet = querySet.filter(instrumentID__in=instrumentIdList)
+        if directionCode :
+            querySet = querySet.filter(direction=directionCode)
+
+        # 统计头寸手数
+        volume = 0
+        for tradingRecord in querySet:
+            volume += tradingRecord.volume
+
+        # 返回结果
+        return volume
 
 
 
-    def listPosition(state):
+    def getPostionQuerySet(self,**kwargs):
+        '''
+        获取头寸数据集
+        主要是封装task,strategyExecuter的过滤操作
+        '''
+        querySet = ModelTradingRecord.objects.all()
+        if self.task:
+            querySet = querySet.filter(task=self.task)
+        if self.strategyExecuter:
+            querySet = querySet.filter(strategyExecuter=self.strategyExecuter)
+        return querySet
+
+
+
+    def listPosition(self,state=None):
         '''
         查看头寸
         '''
-        pass
+        # 设置查询条件
+        querySet = self.getPostionQuerySet()
+        if state:
+            querySet = querySet.filter(state=state)
+
+        # 按开仓时间排序
+        querySet = querySet.order_by('openTime')
+
+        # 转化位列表结构
+        return list(querySet)
 
 
-    def closePostion(tradingRecordId):
-        '''
-        关闭头寸
-        '''
-        pass
+
 
 
 

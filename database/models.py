@@ -254,8 +254,13 @@ class ModelTradingRecord(models.Model):
     # 平仓价格(closePrice)
     closePrice = models.FloatField(u'平仓价格',blank=True, null=True)
     # 状态(state)
-    TRADING_STATE = (('preopen','预建单'),('open',u'开仓'),('close',u'平仓'))
+    TRADING_STATE = (('preopen',u'预开仓'),('open',u'开仓'),('preclose',u'预平仓'),('close',u'平仓'))
     state = models.CharField(u'状态', max_length=30,choices=TRADING_STATE)
+    # 上次操作出错代码(lastErrorId)
+    lastErrorID = models.IntegerField(u'上次操作出错代码', default=0)
+    # 上次操作出错信息(lastErrorMsg)
+    lastErrorMsg = models.CharField(u'上次操作出错信息',max_length=500, default='')
+
 
     class Meta:
         verbose_name = u'交易记录'
