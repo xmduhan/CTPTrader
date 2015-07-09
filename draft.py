@@ -8,13 +8,17 @@
 1、完成所有数据结构的model文件定义（ok）
 1、配置初始化数据（ok）
 1、增加策略目录并开发1个简单测试策略（ok）
+1、数据生成器进程基本代码(ok)
 
 #%% 待处理
-1、数据生成器进程基本代码
-1、后台守护进程基本代码
+1、为TraderChannel增加brokerID和userID属性
+1、trader.orderInsert参数的大小写问题
 1、策略执行器进程代码
-1、管理命令
 
+1、后台守护进程基本代码
+1、管理命令
+1、日志问题字符串标识来统一(是否把日志拆分成数据生成器和策略执行器)
+1、关于instrumentId 和 instrumentID 的冲突问题
 
 #%%
 # 导入环境变量
@@ -72,11 +76,10 @@ os.chdir('/home/duhan/github/CTPTrader')
 path = 'strategies/sample'
 filename = 'sample.py'
 fullFilePath = os.path.join(path,filename)
-
 import imp
-model = imp.load_source(filename, fullFilePath)
-
-
-
+strategy = imp.load_source( filename.split('.')[:1][0], fullFilePath)
+print hasattr(strategy,'onDataArrived')
+print hasattr(strategy,'onDataArrived')
+print strategy.onDataArrived.func_code.co_varnames
 
 

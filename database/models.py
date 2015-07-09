@@ -231,18 +231,18 @@ class ModelTradingRecord(models.Model):
     '''
     交易记录
     '''
+    # 头寸标识(positionId) TODO 可否直接使用TradingRecord的id
     # 任务(task)
-    task = models.ForeignKey('ModelTask',verbose_name=u'任务')
+    task = models.ForeignKey('ModelTask',verbose_name=u'任务',blank=True,null=True)
     # 策略执行器(strategyExecuter)
-    strategyExecuter = models.ForeignKey('ModelStrategyExecuter',verbose_name=u'策略执行器')
+    strategyExecuter = models.ForeignKey('ModelStrategyExecuter',verbose_name=u'策略执行器',blank=True,null=True)
     # 是否模拟交易(simulate)
     simulate = models.BooleanField(u'是否模拟交易',default=True)
-    # 头寸标识(positionId) TODO 可否直接使用TradingRecord的id
     # 品种(instrumentID)
     instrumentID = models.CharField(u'品种',max_length=50)
     # 交易方向(tradingDirection)
-    TRADING_DIRECTION = (('Buy',u'做多'),('Sell',u'做空'))
-    tradingDirection = models.CharField(u'交易方向', max_length=30,choices=TRADING_DIRECTION)
+    TRADING_DIRECTION = (('buy',u'做多'),('sell',u'做空'))
+    direction = models.CharField(u'交易方向', max_length=30,choices=TRADING_DIRECTION)
     # 交易数量(volume)
     volume = models.FloatField(u'交易数量')
     # 开仓时间(openTime)
@@ -254,7 +254,7 @@ class ModelTradingRecord(models.Model):
     # 平仓价格(closePrice)
     closePrice = models.FloatField(u'平仓价格',blank=True, null=True)
     # 状态(state)
-    TRADING_STATE = (('Preopen','预建单'),('Open',u'开仓'),('Close',u'平仓'))
+    TRADING_STATE = (('preopen','预建单'),('open',u'开仓'),('close',u'平仓'))
     state = models.CharField(u'状态', max_length=30,choices=TRADING_STATE)
 
     class Meta:

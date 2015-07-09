@@ -193,7 +193,7 @@ def main():
         dataGeneratorId = sys.argv[1]
         dataGenerator = ModelDataGenerator.objects.get(id=dataGeneratorId)
     except:
-        print u'所指定的数据生成在不存在'
+        print u'所指定的数据生成器不存在'
         return
 
     dataSource = dataGenerator.dataSource
