@@ -106,12 +106,12 @@ admin.site.register(ModelStrategyExecuter,StrategyExecuterAdmin)
 class TradingRecordAdmin(admin.ModelAdmin):
     ''' '''
 
-    fields = ['task','strategyExecuter','instrumentID','tradingDirection','volume',\
-    'openPrice','closePrice','state','simulate']
+    fields = ['task','strategyExecuter','instrumentID','direction','volume',\
+    'openPrice','closePrice','state','simulate','lastErrorID','lastErrorMsg']
 
-    list_display = ['task','strategyExecuter','instrumentID','tradingDirection',\
+    list_display = ['task','strategyExecuter','instrumentID','direction',\
         'openPrice','closePrice','volume','state','simulate']
 
-    list_filter = ['state','tradingDirection','instrumentID','strategyExecuter','simulate']
+    list_filter = ['state','direction','instrumentID','strategyExecuter','simulate']
 
 admin.site.register(ModelTradingRecord,TradingRecordAdmin)

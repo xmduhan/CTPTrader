@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+from comhelper import setDjangoEnvironment
+setDjangoEnvironment()
 
 from database.models import *
 from datetime import datetime
+from pyctp.CTPChannel import TraderChannel
 from pyctp.CTPChannel import CThostFtdcInputOrderField
-
+from pyctp.CTPChannel import CThostFtdcSettlementInfoConfirmField
 
 UnkownPositionDirection = [-3000,u'未知头寸方向',None]
 PositionNotExists = [-3001,u'头寸不存在',None]
@@ -16,7 +19,7 @@ class Trader(object):
     交易处理类
     '''
 
-    def __init__(self,traderChannel,task=None,strategyExecuter=None,simulate=False):
+    def __init__(self,account,task=None,strategyExecuter=None,simulate=False):
         '''
         构造函数
         traderChannel CTP Trader 交易通道的实例
@@ -24,11 +27,46 @@ class Trader(object):
         strategyExecuter 策略执行器数据对象(database.models.ModelStrategyExecuter)
         '''
         self.task = task
-        self.strategy = strategyExecuter
+        self.strategyExecuter = strategyExecuter
         self.simulate = simulate
-        self.brokerID = traderChannel.brokerID
-        self.userID = traderChannel.userID
+        self.account = account
+        self.frontAddress = account.frontAddress
+        self.brokerID = account.brokerID
+        self.userID = account.userID
+        self.password = account.password
+        self.traderChannel = TraderChannel(
+            self.frontAddress,
+            self.brokerID,
+            self.userID,
+            self.password
+        )
+        self.orderRefSeq = 0
 
+        # 确认交易信息
+        self.settlementInfoConfirm()
+
+
+    def settlementInfoConfirm(self):
+        # 确认交易记录
+        requestData = CThostFtdcSettlementInfoConfirmField()
+        requestData.BrokerID = self.brokerID
+        requestData.InvestorID = self.userID
+        result = self.traderChannel.SettlementInfoConfirm(requestData)
+        if result[0] <> 0:
+            raise Exception(u'确认之前交易信息失败')
+
+
+    def getTraderChannel():
+        '''
+        读取当前交易对象的交易通道
+        '''
+        return self.traderChannel()
+
+    def getOrderRef(self,tradingRecordId):
+        '''
+        获取OrderRef序列值
+        '''
+        return ('%12d' % tradingRecordId).replace(' ','0') # '000000000001'
 
     def orderInsert(self,orderRef,instrumentId,orderPriceType = '1',direction = '0',combOffsetFlag = '0',
             combHedgeFlag = '1',limitPrice = 0,volumeTotalOriginal = 1,timeCondition = '1',gTDDate = '',
@@ -149,7 +187,7 @@ class Trader(object):
         requestData.UserForceClose = userForceClose
         requestData.IsSwapOrder = isSwapOrder
 
-        result = traderChannel.OrderInsert(requestData)
+        result = self.traderChannel.OrderInsert(requestData)
         return result
 
 
@@ -166,14 +204,23 @@ class Trader(object):
         else:
             return UnkownPositionDirection
 
+        # 设置头寸大小
+        if volume == None :
+            if self.strategyExecuter != None:
+                volumeTotalOriginal = self.strategyExecuter.None or 1
+            else:
+                 volumeTotalOriginal = 1
+        else:
+            volumeTotalOriginal = volume
+
         # 创建一条预开单记录
         tradingRecord = ModelTradingRecord()
         tradingRecord.task = self.task
         tradingRecord.strategyExecuter = self.strategyExecuter
         tradingRecord.simulate = self.simulate
         tradingRecord.instrumentID = instrumentId
-        tradingRecord.direction = direction
-        tradingRecord.volume = volume
+        tradingRecord.direction = directionCode
+        tradingRecord.volume = volumeTotalOriginal
         tradingRecord.openTime = datetime.now()
         tradingRecord.state =  'preopen'
         tradingRecord.save()
@@ -181,9 +228,10 @@ class Trader(object):
         # 发送建单请求
         errorId,errorMsg,data = self.orderInsert(
             instrumentId=instrumentId,
+            orderRef = self.getOrderRef(tradingRecord.id),
             direction=direction,
             combOffsetFlag='0',     #开仓
-            volume=volume or self.volume
+            volumeTotalOriginal=volumeTotalOriginal
         )
 
         if errorId == 0 :
@@ -194,9 +242,9 @@ class Trader(object):
             return 0,u'',tradingRecord
         else:
             tradingRecord.lastErrorID = errorId
-            tradingRecord.lastErrorMsg = lastErrorMsg
+            tradingRecord.lastErrorMsg = errorMsg
             tradingRecord.save()
-            return errorId,lastErrorMsg,None
+            return errorId,errorMsg,None
 
 
     def closePostion(self,tradingRecordId):
@@ -228,10 +276,10 @@ class Trader(object):
 
         # 发送建单请求
         errorId,errorMsg,data = self.orderInsert(
-            instrumentId=instrumentId,
-            direction=direction,
-            combOffsetFlag = '1',     #开仓
-            volume=tradingRecord.volume
+            instrumentId = tradingRecord.instrumentID,
+            direction = direction,
+            combOffsetFlag = '1',     #平仓
+            volumeTotalOriginal = tradingRecord.volume
         )
 
         # 返回平仓结果

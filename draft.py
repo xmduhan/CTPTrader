@@ -11,7 +11,7 @@
 1、数据生成器进程基本代码(ok)
 
 #%% 待处理
-1、为TraderChannel增加brokerID和userID属性
+1、tradingRecord需要改成postion并增加，一个order对象。
 1、trader.orderInsert参数的大小写问题
 1、策略执行器进程代码
 
@@ -83,3 +83,44 @@ print hasattr(strategy,'onDataArrived')
 print strategy.onDataArrived.func_code.co_varnames
 
 
+#%% 创建供测试trader
+import os
+os.chdir('/home/duhan/github/CTPTrader')
+from comhelper import setDjangoEnvironment
+setDjangoEnvironment()
+from database.models import ModelAccount
+from trader import Trader
+account = ModelAccount.objects.get(id=1)
+trader = Trader(account)
+#%% 测试开仓
+result = trader.openPosition('IF1508','buy')
+print result[0],result[1],result[2]
+
+#%% 测试列出头寸
+print trader.listPosition()
+
+#%% 仅列出打开的头寸 
+print trader.listPosition(state = 'preclose')
+
+
+
+#%% 测试关闭头寸
+trader.closePostion(11)
+
+
+#%%  测试ctp 交易通道是否可以建立
+import os
+os.chdir('/home/duhan/github/CTPTrader')
+from comhelper import setDjangoEnvironment
+setDjangoEnvironment()
+from database.models import ModelAccount
+account = ModelAccount.objects.get(id=1)
+
+from pyctp.CTPChannel import TraderChannel
+traderChannel = TraderChannel(
+    account.frontAddress,
+    account.brokerID,
+    account.userID,
+    account.password
+)
+traderChannel

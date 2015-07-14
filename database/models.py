@@ -248,7 +248,7 @@ class ModelTradingRecord(models.Model):
     # 开仓时间(openTime)
     openTime = models.DateTimeField(u'开仓时间')
     # 开仓价格(openPrice)
-    openPrice = models.FloatField(u'开仓价格')
+    openPrice = models.FloatField(u'开仓价格',blank=True,null=True)
     # 平仓时间(closeTime)
     closeTime = models.DateTimeField(u'平仓时间',blank=True, null=True)
     # 平仓价格(closePrice)
@@ -260,6 +260,9 @@ class ModelTradingRecord(models.Model):
     lastErrorID = models.IntegerField(u'上次操作出错代码', default=0)
     # 上次操作出错信息(lastErrorMsg)
     lastErrorMsg = models.CharField(u'上次操作出错信息',max_length=500, default='')
+
+    def __unicode__(self):
+        return '%d,%s,%.1f,%s' % (self.id,self.direction,self.volume,self.state)
 
 
     class Meta:
