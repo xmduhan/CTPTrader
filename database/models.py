@@ -177,8 +177,8 @@ class ModelDataGenerator(models.Model):
     datetimeBegin = models.DateTimeField(u'数据起始时间',blank=True, null=True)
     # 数据结束时间(datetimeEnd)
     datetimeEnd = models.DateTimeField(u'数据结束时间',blank=True, null=True)
-    # 品种列表(instrumentIdList) json数据格式
-    instrumentIdList = models.CharField(u'品种列表',max_length=500)
+    # 品种列表(instrumentIDList) json数据格式
+    instrumentIDList = models.CharField(u'品种列表',max_length=500)
     # 是否保存原始数据流(saveRawData)
     saveRawData = models.BooleanField(u'是否保存原始数据流',default=False)
     # 是否保存棒线数据(saveBarData)
@@ -211,8 +211,8 @@ class ModelStrategyExecuter(models.Model):
     strategyConfig = models.CharField(u'策略配置文件',max_length=100)
     # 数据接收地址(receiveAddress)
     receiveAddress = models.CharField(u'数据接收地址',max_length=100)
-    # 品种列表(instrumentIdList)
-    instrumentIdList = models.CharField(u'品种列表',max_length=500)
+    # 品种列表(instrumentIDList)
+    instrumentIDList = models.CharField(u'品种列表',max_length=500)
     # 默认头寸大小(volume)
     volume = models.FloatField(u'默认头寸大小', default=1)
     # 最大做多头寸数量(maxBuyPosition)

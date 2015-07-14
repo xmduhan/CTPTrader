@@ -12,7 +12,7 @@
 
 #%% 待处理
 1、tradingRecord需要改成Postion并增加，增加一个Order实体对象。
-1、关于instrumentId 和 instrumentID 的冲突问题
+1、关于instrumentID 和 instrumentID 的冲突问题
 1、trader.orderInsert参数的大小写问题
 1、策略执行器进程代码
 

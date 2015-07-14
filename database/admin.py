@@ -80,7 +80,7 @@ class DataGeneratorAdmin(admin.ModelAdmin):
     ''' '''
 
     fields = ['name','account','dataCatalog','dataSource','datetimeBegin','datetimeEnd',\
-        'instrumentIdList','saveRawData','saveBarData','saveIndexData','broadcastAddress','interval']
+        'instrumentIDList','saveRawData','saveBarData','saveIndexData','broadcastAddress','interval']
 
     list_display = ['id','name','account','dataCatalog','dataSource','broadcastAddress']
 
@@ -93,10 +93,10 @@ class StrategyExecuterAdmin(admin.ModelAdmin):
     ''' '''
 
     fields = ['name','account','strategyDir','strategyProgram','strategyConfig',\
-    'receiveAddress',    'instrumentIdList','volume','maxBuyPosition',\
+    'receiveAddress',    'instrumentIDList','volume','maxBuyPosition',\
     'maxSellPosition','simulate']
 
-    list_display = ['id','name','account','receiveAddress','instrumentIdList','simulate']
+    list_display = ['id','name','account','receiveAddress','instrumentIDList','simulate']
 
     #list_filter = []
 

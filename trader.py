@@ -68,13 +68,13 @@ class Trader(object):
         '''
         return ('%12d' % tradingRecordId).replace(' ','0') # '000000000001'
 
-    def orderInsert(self,orderRef,instrumentId,orderPriceType = '1',direction = '0',combOffsetFlag = '0',
+    def orderInsert(self,orderRef,instrumentID,orderPriceType = '1',direction = '0',combOffsetFlag = '0',
             combHedgeFlag = '1',limitPrice = 0,volumeTotalOriginal = 1,timeCondition = '1',gTDDate = '',
             volumeCondition = '1',minVolume = None,contingentCondition = '1',stopPrice = 0,forceCloseReason = '0',
             isAutoSuspend = 0,businessUnit = '',requestID = 1,userForceClose = 0,isSwapOrder = 0):
         '''
         orderRef 报单序列号实际就是数据对象ModelTradingRecord的id转化为字符串
-        instrumentId 交易品种代码
+        instrumentID 交易品种代码
         orderPriceType 报单价格条件 char
         //// THOST_FTDC_OPT_AnyPrice '1' 任意价
         //// THOST_FTDC_OPT_LimitPrice '2' 限价
@@ -165,7 +165,7 @@ class Trader(object):
         requestData = CThostFtdcInputOrderField()
         requestData.BrokerID = self.brokerID
         requestData.InvestorID = self.userID
-        requestData.InstrumentID = instrumentId
+        requestData.InstrumentID = instrumentID
         requestData.OrderRef = orderRef
         requestData.UserID = self.userID
         requestData.OrderPriceType = orderPriceType
@@ -191,7 +191,7 @@ class Trader(object):
         return result
 
 
-    def openPosition(self,instrumentId,directionCode,volume=None):
+    def openPosition(self,instrumentID,directionCode,volume=None):
         '''
         创建头寸
         '''
@@ -218,7 +218,7 @@ class Trader(object):
         tradingRecord.task = self.task
         tradingRecord.strategyExecuter = self.strategyExecuter
         tradingRecord.simulate = self.simulate
-        tradingRecord.instrumentID = instrumentId
+        tradingRecord.instrumentID = instrumentID
         tradingRecord.direction = directionCode
         tradingRecord.volume = volumeTotalOriginal
         tradingRecord.openTime = datetime.now()
@@ -227,7 +227,7 @@ class Trader(object):
 
         # 发送建单请求
         errorId,errorMsg,data = self.orderInsert(
-            instrumentId=instrumentId,
+            instrumentID=instrumentID,
             orderRef = self.getOrderRef(tradingRecord.id),
             direction=direction,
             combOffsetFlag='0',     #开仓
@@ -276,7 +276,7 @@ class Trader(object):
 
         # 发送建单请求
         errorId,errorMsg,data = self.orderInsert(
-            instrumentId = tradingRecord.instrumentID,
+            instrumentID = tradingRecord.instrumentID,
             direction = direction,
             combOffsetFlag = '1',     #平仓
             volumeTotalOriginal = tradingRecord.volume
@@ -296,10 +296,10 @@ class Trader(object):
             return errorId,lastErrorMsg,None
 
 
-    def closeAllPosition(self,instrumentIdList=None,directionCode=None):
+    def closeAllPosition(self,instrumentIDList=None,directionCode=None):
         '''
         关闭满足条件的所有头寸
-        instrumentIdList 要平仓的品种列表
+        instrumentIDList 要平仓的品种列表
         directionCode 要平仓的交易方向
         返回格式:
         如果成功返回:[0,[关闭成功的头寸对应的ModelTradingRecord对象],[]]
@@ -308,8 +308,8 @@ class Trader(object):
         # 设置查询条件
         querySet = self.getPostionQuerySet()
         querySet = querySet.filter(state__in=['open','preclose'])
-        if instrumentIdList :
-            querySet = querySet.filter(instrumentID__in=instrumentIdList)
+        if instrumentIDList :
+            querySet = querySet.filter(instrumentID__in=instrumentIDList)
         if directionCode :
             querySet = querySet.filter(direction=directionCode)
 
@@ -336,15 +336,15 @@ class Trader(object):
         pass
 
 
-    def getPostionVolume(self,instrumentIdList=None,directionCode=None):
+    def getPostionVolume(self,instrumentIDList=None,directionCode=None):
         '''
         获取头寸手数
         '''
         # 设置查询条件
         querySet = self.getPostionQuerySet()
         querySet = querySet.filter(state__in=['open','preclose'])
-        if instrumentIdList :
-            querySet = querySet.filter(instrumentID__in=instrumentIdList)
+        if instrumentIDList :
+            querySet = querySet.filter(instrumentID__in=instrumentIDList)
         if directionCode :
             querySet = querySet.filter(direction=directionCode)
 

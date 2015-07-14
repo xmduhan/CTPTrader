@@ -25,7 +25,7 @@ class DataGenerator(object):
         self.broadcastAddress = modelDataGenerator.broadcastAddress
         self.saveRawData = modelDataGenerator.saveRawData
         self.dataCatalog = modelDataGenerator.dataCatalog
-        self.instrumentIdList = json.loads(modelDataGenerator.instrumentIdList)
+        self.instrumentIDList = json.loads(modelDataGenerator.instrumentIDList)
         self.account = modelDataGenerator.account
 
         # 创建zmq行情发布管道
@@ -59,7 +59,7 @@ class DataGenerator(object):
         处理一帧数据
         '''
         # 读取交易品种标识
-        instrumentId = rawMarketData['InstrumentID']
+        instrumentID = rawMarketData['InstrumentID']
 
         # 读取关键信息报价
         marketData = {}
@@ -80,7 +80,7 @@ class DataGenerator(object):
         # 发送行情广播消息
         # 消息格式:[品种编号(InstrumentID),报价数据(MarketData),棒线数据(BarData),指标数据(IndexData)]
         marketDataJson = json.dumps(marketData)
-        message = [instrumentId,marketDataJson,'','']
+        message = [instrumentID,marketDataJson,'','']
         self.sendMessage(message)
 
         # 保存原始行情数据到数据库
@@ -126,7 +126,7 @@ class CTPChannelGenerator(DataGenerator):
             brokerID = self.account.brokerID,
             userID = self.account.userID,
             password = self.account.password,
-            instrumentIdList = self.instrumentIdList
+            instrumentIDList = self.instrumentIDList
         )
 
         # 从CTP接口读取数据
@@ -155,7 +155,7 @@ class DatabaseGenerator(DataGenerator):
         '''
         等待时间间隔
         '''
-        interval = (self.interval or .5) / len(self.instrumentIdList)
+        interval = (self.interval or .5) / len(self.instrumentIDList)
         time.sleep(interval)
 
 
@@ -165,7 +165,7 @@ class DatabaseGenerator(DataGenerator):
         '''
         # 设定数据查询条件
         querySet = ModelDepthMarketData.objects.filter(dataCatalog=self.dataCatalog)
-        querySet = querySet.filter(InstrumentID__in=self.instrumentIdList)
+        querySet = querySet.filter(InstrumentID__in=self.instrumentIDList)
         if self.datetimeBegin :
             querySet = querySet.filter(dataTime__gte=self.datetimeBegin)
         if self.datetimeEnd :
