@@ -11,14 +11,15 @@
 1、数据生成器进程基本代码(ok)
 
 #%% 待处理
-1、tradingRecord需要改成postion并增加，一个order对象。
+1、tradingRecord需要改成Postion并增加，增加一个Order实体对象。
+1、关于instrumentId 和 instrumentID 的冲突问题
 1、trader.orderInsert参数的大小写问题
 1、策略执行器进程代码
 
 1、后台守护进程基本代码
 1、管理命令
 1、日志问题字符串标识来统一(是否把日志拆分成数据生成器和策略执行器)
-1、关于instrumentId 和 instrumentID 的冲突问题
+
 
 #%%
 # 导入环境变量

@@ -30,10 +30,10 @@ class Trader(object):
         self.strategyExecuter = strategyExecuter
         self.simulate = simulate
         self.account = account
-        self.frontAddress = account.frontAddress
+        #self.frontAddress = account.frontAddress
         self.brokerID = account.brokerID
         self.userID = account.userID
-        self.password = account.password
+        #self.password = account.password
         self.traderChannel = TraderChannel(
             self.frontAddress,
             self.brokerID,
@@ -386,17 +386,3 @@ class Trader(object):
 
         # 转化位列表结构
         return list(querySet)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
