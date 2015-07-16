@@ -103,7 +103,7 @@ class StrategyExecuterAdmin(admin.ModelAdmin):
 admin.site.register(ModelStrategyExecuter,StrategyExecuterAdmin)
 
 
-class TradingRecordAdmin(admin.ModelAdmin):
+class PositionAdmin(admin.ModelAdmin):
     ''' '''
 
     fields = ['task','strategyExecuter','instrumentID','direction','volume',\
@@ -114,4 +114,4 @@ class TradingRecordAdmin(admin.ModelAdmin):
 
     list_filter = ['state','direction','instrumentID','strategyExecuter','simulate']
 
-admin.site.register(ModelTradingRecord,TradingRecordAdmin)
+admin.site.register(ModelPosition,PositionAdmin)

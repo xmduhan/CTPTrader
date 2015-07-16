@@ -227,11 +227,11 @@ class ModelStrategyExecuter(models.Model):
         verbose_name_plural = u'[07].策略执行器'
 
 
-class ModelTradingRecord(models.Model):
+class ModelPosition(models.Model):
     '''
     交易记录
     '''
-    # 头寸标识(positionId) TODO 可否直接使用TradingRecord的id
+    # 头寸标识(positionId) TODO 可否直接使用Position的id
     # 任务(task)
     task = models.ForeignKey('ModelTask',verbose_name=u'任务',blank=True,null=True)
     # 策略执行器(strategyExecuter)
@@ -242,7 +242,7 @@ class ModelTradingRecord(models.Model):
     instrumentID = models.CharField(u'品种',max_length=50)
     # 交易方向(tradingDirection)
     TRADING_DIRECTION = (('buy',u'做多'),('sell',u'做空'))
-    direction = models.CharField(u'交易方向', max_length=30,choices=TRADING_DIRECTION)
+    directionCode = models.CharField(u'交易方向代码', max_length=30,choices=TRADING_DIRECTION)
     # 交易数量(volume)
     volume = models.FloatField(u'交易数量')
     # 开仓时间(openTime)
@@ -269,3 +269,51 @@ class ModelTradingRecord(models.Model):
         verbose_name = u'交易记录'
         verbose_name_plural = u'[08].交易记录'
         ordering = ['openTime','closeTime']
+
+
+
+class ModelOrder(models.Model):
+    '''
+    报单记录
+    '''
+    # 任务(task)
+    task = models.ForeignKey('ModelTask',verbose_name=u'任务',blank=True,null=True)
+    # 策略执行器(strategyExecuter)
+    strategyExecuter = models.ForeignKey('ModelStrategyExecuter',verbose_name=u'策略执行器',blank=True,null=True)
+    # 头寸(Position)
+    position = models.ForeignKey('Position',verbose_name=u'头寸',blank=True,null=True)
+    # 是否模拟交易(simulate)
+    simulate = models.BooleanField(u'是否模拟交易',default=True)
+    # 报单编号(orderRef)
+    orderRef = models.CharField(u'报单编号',max_length=50,blank=True,null=True)
+    # 品种(instrumentID)
+    instrumentID = models.CharField(u'品种',max_length=50)
+    # 报单类型(ation)
+    TRADING_ACTION = (('open',u'开仓'),('close',u'平仓'),('openlimit',u'限价开仓'),('closelimit',u'限价平仓'))
+    action = models.CharField(u'报单类型',max_length=50,blank=True,null=True)
+    # 交易方向代码(directionCode)
+    TRADING_DIRECTION = (('buy',u'做多'),('sell',u'做空'))
+    directionCode = models.CharField(u'交易方向代码', max_length=30,choices=TRADING_DIRECTION)
+    # 交易数量(volume)
+    volume = models.FloatField(u'交易数量')
+    # 报单价格(price)
+    price = models.FloatField(u'报单价格')
+    # 价格条件类型
+    PRICE_CONDITION = (('immediate',u'立即单'),('limit',u'限价单'))
+    priceCondition = models.CharField(u'价格条件类型',max_length=50,choices=PRICE_CONDITION)
+    # 报单时间(insertTime)
+    insertTime = models.DateField(u'报单时间',default=datetime.now)
+    # 完成时间(finishTime)
+    finishTime = models.DateField(u'完成时间')
+    # 报单状态(state)
+    ORDER_STATE = (('insert',u'报入'),('finish',u'完成'),('error',u'出错'))
+    state = models.CharField(u'报单状态',max_length=50)
+    # 出错代码(lastErrorId)
+    errorId = models.IntegerField('出错代码')
+    # 出错信息(lastErrorMsg)
+    errorMsg = models.CharField(u'出错信息')
+
+    class Meta:
+        verbose_name = u'报单记录'
+        verbose_name_plural = u'[08].报单记录'
+        ordering = ['insertTime','finishTime']
