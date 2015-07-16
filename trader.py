@@ -53,7 +53,7 @@ class Trader(object):
             raise Exception(u'确认之前交易信息失败')
 
 
-    def getTraderChannel():
+    def getTraderChannel(self):
         '''
         读取当前交易对象的交易通道
         '''
@@ -66,11 +66,10 @@ class Trader(object):
         return ('%12d' % positionId).replace(' ','0') # '000000000001'
 
 
-    def getSimulate():
+    def getSimulate(self):
         '''
         '''
         return self.simulate
-
 
 
     def orderInsert(self,orderRef,instrumentID,orderPriceType = '1',direction = '0',combOffsetFlag = '0',
@@ -207,9 +206,12 @@ class Trader(object):
         return order
 
 
-    def openPosition(self,instrumentID,directionCode,volume=None):
+    def open(self,instrumentID,directionCode,volume=None):
         '''
-        创建头寸
+        创建头寸,使用现价开仓
+        instrumentID   交易品种代码
+        directionCode    头寸方向: 'buy' 做多，'sell' 做空
+        volume  交易手数,如果为空尝试使用策略执行器配置，如果策略执行器也无指定,默认为1
         '''
 
         # 转换头寸方向参数
@@ -283,9 +285,10 @@ class Trader(object):
             return errorId,errorMsg,None
 
 
-    def closePostion(self,positionId):
+    def close(self,positionId):
         '''
-        关闭头寸  估计还是智能根据positionId来平仓
+        关闭头寸,使用现价平仓
+        positionId  对应的头寸记录的Id
         '''
         # 读取ModelPosition记录
         try:
@@ -356,7 +359,7 @@ class Trader(object):
             return errorId,lastErrorMsg,None
 
 
-    def closeAllPosition(self,instrumentIDList=None,directionCode=None):
+    def closeAll(self,instrumentIDList=None,directionCode=None):
         '''
         关闭满足条件的所有头寸
         instrumentIDList 要平仓的品种列表
@@ -367,7 +370,7 @@ class Trader(object):
         '''
         # 设置查询条件
         querySet = self.getPostionQuerySet()
-        querySet = querySet.filter(state__in=['open','preclose'])
+        querySet = querySet.filter(state='open')
         if instrumentIDList :
             querySet = querySet.filter(instrumentID__in=instrumentIDList)
         if directionCode :
@@ -378,7 +381,7 @@ class Trader(object):
         failList = []
         successList = []
         for position in querySet:
-            errorId,errorMsg,data = self.closePostion(position.id)
+            errorId,errorMsg,data = self.close(position.id)
             if errorId == 0 :
                 successList.append(position)
             else:
@@ -417,7 +420,6 @@ class Trader(object):
         return volume
 
 
-
     def getPostionQuerySet(self,**kwargs):
         '''
         获取头寸数据集
@@ -431,8 +433,7 @@ class Trader(object):
         return querySet
 
 
-
-    def listPosition(self,state=None):
+    def getPositionList(self,state=None):
         '''
         查看头寸
         '''
@@ -446,3 +447,7 @@ class Trader(object):
 
         # 转化位列表结构
         return list(querySet)
+
+
+
+
