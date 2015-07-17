@@ -59,7 +59,8 @@ class Trader(object):
         '''
         return self.traderChannel
 
-    def getOrderRef(self,positionId):
+
+    def getOrderRef(self,orderId):
         '''
         获取OrderRef序列值
         '''
@@ -195,16 +196,6 @@ class Trader(object):
         return result
 
 
-    def newModelOrder(self):
-        '''
-        创建新的Order数据对象
-        '''
-        order = ModelOrder()
-        order.task = self.task
-        order.strategyExecuter = self.strategyExecuter
-        order.simulate = self.simulate
-        return order
-
 
     def open(self,instrumentID,directionCode,volume=None):
         '''
@@ -232,7 +223,10 @@ class Trader(object):
             volumeTotalOriginal = volume
 
         # 创建报单记录
-        order = self.newModelOrder()
+        order = ModelOrder()
+        order.task = self.task
+        order.strategyExecuter = self.strategyExecuter
+        order.simulate = self.simulate
         order.instrumentID = instrumentID
         order.action = 'open'
         order.directionCode = directionCode
@@ -244,14 +238,17 @@ class Trader(object):
         order.errorId = 0
         order.errorMsg = ''
         order.save()
+        order.orderRef = self.getOrderRef(order.id)
+        order.save()
+
 
         # 发送建单请求
         errorId,errorMsg,data = self.orderInsert(
-            instrumentID=instrumentID,
-            orderRef = self.getOrderRef(position.id),
-            direction=direction,
-            combOffsetFlag='0',     #开仓
-            volumeTotalOriginal=volumeTotalOriginal
+            instrumentID = instrumentID,
+            orderRef = order.orderRef,
+            direction = direction,
+            combOffsetFlag = '0',     #开仓
+            volumeTotalOriginal = volumeTotalOriginal
         )
 
         if errorId == 0 :
@@ -261,7 +258,7 @@ class Trader(object):
             position.strategyExecuter = self.strategyExecuter
             position.simulate = self.simulate
             position.instrumentID = instrumentID
-            directionCode = directionCode
+            position.directionCode = directionCode
             position.volume = volumeTotalOriginal
             position.openTime = datetime.now()
             position.state = 'open'
@@ -301,7 +298,10 @@ class Trader(object):
             return PositionNotInOpenState
 
         # 生成关闭头寸的报单
-        order = self.newModelOrder()
+        order = ModelOrder()
+        order.task = self.task
+        order.strategyExecuter = self.strategyExecuter
+        order.simulate = self.simulate
         order.position = position
         order.instrumentID = position.instrumentID
         order.action = 'close'
@@ -399,13 +399,13 @@ class Trader(object):
         pass
 
 
-    def getPostionVolume(self,instrumentIDList=None,directionCode=None):
+    def getTotalVolume(self,instrumentIDList=None,directionCode=None):
         '''
         获取头寸手数
         '''
         # 设置查询条件
         querySet = self.getPostionQuerySet()
-        querySet = querySet.filter(state__in=['open','preclose'])
+        querySet = querySet.filter(state__in=['open'])
         if instrumentIDList :
             querySet = querySet.filter(instrumentID__in=instrumentIDList)
         if directionCode :
@@ -447,7 +447,3 @@ class Trader(object):
 
         # 转化位列表结构
         return list(querySet)
-
-
-
-

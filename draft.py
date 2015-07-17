@@ -10,15 +10,17 @@
 1、增加策略目录并开发1个简单测试策略（ok）
 1、数据生成器进程基本代码(ok)
 1、关于instrumentID 和 instrumentID 的冲突问题(ok)
+1、tradingRecord需要改成Postion并增加，增加一个Order实体对象。(ok)
 
 #%% 待处理
-1、position需要改成Postion并增加，增加一个Order实体对象。
+1、需要一个模拟的trader
 1、执行器不应该记录的是广播地址，而应该是对应的数据生成器对象
 1、trader.orderInsert参数的大小写问题
 1、策略执行器进程代码
 1、后台守护进程基本代码
 1、管理命令
 1、日志问题字符串标识来统一(是否把日志拆分成数据生成器和策略执行器)
+1、交易策略如何安装退出?如何通讯
 
 
 #%%
@@ -84,6 +86,15 @@ print hasattr(strategy,'onDataArrived')
 print strategy.onDataArrived.func_code.co_varnames
 
 
+#%% 导入config.json文件
+import os
+import json
+os.chdir('/home/duhan/github/CTPTrader')
+filename = 'strategies/sample/config.json'
+with open(filename) as f:
+    print json.load(f)
+
+
 #%% 创建供测试trader
 import os
 os.chdir('/home/duhan/github/CTPTrader')
@@ -94,19 +105,19 @@ from trader import Trader
 account = ModelAccount.objects.get(id=1)
 trader = Trader(account)
 #%% 测试开仓
-result = trader.openPosition('IF1508','buy')
+result = trader.open('IF1508','buy',1)
 print result[0],result[1],result[2]
 
 #%% 测试列出头寸
-print trader.listPosition()
+print trader.getPositionList()
 
 #%% 仅列出打开的头寸 
-print trader.listPosition(state = 'preclose')
+print trader.getPositionList(state = 'open')
 
 
 
 #%% 测试关闭头寸
-trader.closePostion(2)
+trader.close(3)
 
 
 #%%  测试ctp 交易通道是否可以建立

@@ -262,7 +262,7 @@ class ModelPosition(models.Model):
     lastErrorMsg = models.CharField(u'上次操作出错信息',max_length=500, default='')
 
     def __unicode__(self):
-        return '%d,%s,%.1f,%s' % (self.id,self.direction,self.volume,self.state)
+        return '%d,%s,%.1f,%s' % (self.id,self.directionCode,self.volume,self.state)
 
 
     class Meta:
@@ -281,7 +281,7 @@ class ModelOrder(models.Model):
     # 策略执行器(strategyExecuter)
     strategyExecuter = models.ForeignKey('ModelStrategyExecuter',verbose_name=u'策略执行器',blank=True,null=True)
     # 头寸(Position)
-    position = models.ForeignKey('Position',verbose_name=u'头寸',blank=True,null=True)
+    position = models.ForeignKey('ModelPosition',verbose_name=u'头寸',blank=True,null=True)
     # 是否模拟交易(simulate)
     simulate = models.BooleanField(u'是否模拟交易',default=True)
     # 报单编号(orderRef)
@@ -304,14 +304,14 @@ class ModelOrder(models.Model):
     # 报单时间(insertTime)
     insertTime = models.DateField(u'报单时间',default=datetime.now)
     # 完成时间(finishTime)
-    finishTime = models.DateField(u'完成时间')
+    finishTime = models.DateField(u'完成时间',blank=True,null=True)
     # 报单状态(state)
     ORDER_STATE = (('insert',u'报入'),('finish',u'完成'),('error',u'出错'))
     state = models.CharField(u'报单状态',max_length=50)
     # 出错代码(lastErrorId)
     errorId = models.IntegerField('出错代码')
     # 出错信息(lastErrorMsg)
-    errorMsg = models.CharField(u'出错信息')
+    errorMsg = models.CharField(u'出错信息',max_length=500)
 
     class Meta:
         verbose_name = u'报单记录'

@@ -106,12 +106,30 @@ admin.site.register(ModelStrategyExecuter,StrategyExecuterAdmin)
 class PositionAdmin(admin.ModelAdmin):
     ''' '''
 
-    fields = ['task','strategyExecuter','instrumentID','direction','volume',\
+    fields = ['task','strategyExecuter','instrumentID','directionCode','volume',\
     'openPrice','closePrice','state','simulate','lastErrorID','lastErrorMsg']
 
-    list_display = ['task','strategyExecuter','instrumentID','direction',\
+    list_display = ['task','strategyExecuter','instrumentID','directionCode',\
         'openPrice','closePrice','volume','state','simulate']
 
-    list_filter = ['state','direction','instrumentID','strategyExecuter','simulate']
+    list_filter = ['state','directionCode','instrumentID','strategyExecuter','simulate']
 
 admin.site.register(ModelPosition,PositionAdmin)
+
+
+class OrderAdmin(admin.ModelAdmin):
+    ''' '''
+    fields = ['task','strategyExecuter','position','simulate','orderRef','instrumentID',\
+        'action','directionCode','volume','price','priceCondition','insertTime','finishTime',\
+        'state','errorId','errorMsg']
+
+    list_display = ['orderRef','instrumentID','action','directionCode','volume','price',\
+            'priceCondition','insertTime','finishTime','state']
+
+    list_filter = ['task','strategyExecuter','simulate']
+
+
+admin.site.register(ModelOrder,OrderAdmin)
+
+
+

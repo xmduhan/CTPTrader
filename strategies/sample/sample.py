@@ -6,7 +6,7 @@ def onInit(config):
     '''
     执行器初始化时调用
     '''
-    pass
+    print config
 
 
 
@@ -14,7 +14,7 @@ def onDataArrived(data,trader):
     '''
     执行数据每次接受到数据
     '''
-    pass
+    print data,trader
 
 
 
