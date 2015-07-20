@@ -64,7 +64,7 @@ class Trader(object):
         '''
         获取OrderRef序列值
         '''
-        return ('%12d' % positionId).replace(' ','0') # '000000000001'
+        return ('%12d' % orderId).replace(' ','0') # '000000000001'
 
 
     def getSimulate(self):

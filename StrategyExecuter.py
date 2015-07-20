@@ -92,7 +92,11 @@ def main():
             onDataArrivedArgs['trader'] = trader
 
         # 调用onDataArrived
-        strategyModule.onDataArrived(**onDataArrivedArgs)
+        try:
+            strategyModule.onDataArrived(**onDataArrivedArgs)
+        except :
+            raise
+            print u'出现异常...'
 
 
 

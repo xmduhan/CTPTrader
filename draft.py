@@ -15,6 +15,7 @@
 #%% 待处理
 1、需要一个模拟的trader
 1、执行器不应该记录的是广播地址，而应该是对应的数据生成器对象
+1、需要一些测试用例来保持程序质量
 1、trader.orderInsert参数的大小写问题
 1、策略执行器进程代码
 1、后台守护进程基本代码
@@ -136,3 +137,17 @@ traderChannel = TraderChannel(
     account.password
 )
 traderChannel
+
+
+#%% 定长队列
+from collections import deque
+q = deque(maxlen=10)
+for i in range(10):
+    q.append(i)
+
+#%%
+from pandas import Series
+s = Series(range(10))
+s.mean()
+s.std()
+
