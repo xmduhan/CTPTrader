@@ -321,7 +321,7 @@ class Trader(object):
         # NOTE:注意ctp平仓时交易方向是相反的
         if position.directionCode == 'buy' :
             direction = '1'     # sell
-        elif directionCode  == 'sell':
+        elif position.directionCode  == 'sell':
             direction = '0'     # buy
         else:
             return UnkownPositionDirection
@@ -356,7 +356,7 @@ class Trader(object):
             order.finishTime = datetime.now()
             order.save()
             # 返回错误信息
-            return errorId,lastErrorMsg,None
+            return errorId,errorMsg,None
 
 
     def closeAll(self,instrumentIDList=None,directionCode=None):

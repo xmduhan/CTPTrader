@@ -109,8 +109,8 @@ class PositionAdmin(admin.ModelAdmin):
     fields = ['task','strategyExecuter','instrumentID','directionCode','volume',\
     'openPrice','closePrice','state','simulate','lastErrorID','lastErrorMsg']
 
-    list_display = ['task','strategyExecuter','instrumentID','directionCode',\
-        'openPrice','closePrice','volume','state','simulate']
+    list_display = ['id','task','strategyExecuter','instrumentID','directionCode',\
+        'openPrice','closePrice','volume','state','simulate','profit']
 
     list_filter = ['state','directionCode','instrumentID','strategyExecuter','simulate']
 

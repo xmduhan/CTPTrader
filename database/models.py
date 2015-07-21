@@ -264,6 +264,14 @@ class ModelPosition(models.Model):
     def __unicode__(self):
         return '%d,%s,%.1f,%s' % (self.id,self.directionCode,self.volume,self.state)
 
+    def profit(self):
+        if self.state != 'close':
+            return 0
+        if self.directionCode == 'buy':
+            return self.closePrice - self.openPrice
+        if self.directionCode == 'sell':
+            return self.openPrice - self.closePrice
+
 
     class Meta:
         verbose_name = u'交易记录'

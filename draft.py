@@ -151,3 +151,29 @@ s = Series(range(10))
 s.mean()
 s.std()
 
+
+#%% 交易结果导出到excel
+import os
+os.chdir('/home/duhan/github/CTPTrader')
+from comhelper import setDjangoEnvironment
+setDjangoEnvironment()
+from database.models import *
+from django_pandas.io import read_frame
+from pandas.io.excel import ExcelWriter
+df = read_frame(ModelPosition.objects.filter(state='close'))
+writer = ExcelWriter('/tmp/output.xls')
+df.to_excel(writer)
+writer.save()
+
+#%% 统计交易结果
+import os
+os.chdir('/home/duhan/github/CTPTrader')
+from comhelper import setDjangoEnvironment
+setDjangoEnvironment()
+from django_pandas.io import read_frame
+df = read_frame(ModelPosition.objects.filter(state='close'))
+df['profit'] = df.apply(lambda x: x.closePrice-x.openPrice if x.directionCode==u'做多' else x.openPrice-x.closePrice,axis=1)
+c1 = df.id > 60
+c2 = df.id < 150  
+df[c1&c2]['profit'].cumsum().plot()
+
