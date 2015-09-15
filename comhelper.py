@@ -3,9 +3,11 @@ import os
 import sys
 import django
 
+
 def getProjectPath():
     fullpath = os.path.abspath(__file__)
     return os.path.split(fullpath)[0]
+
 
 def setDjangoEnvironment():
     '''
