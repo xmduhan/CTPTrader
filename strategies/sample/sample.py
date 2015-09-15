@@ -34,6 +34,7 @@ def openPair(trader,instrumentID0,instrumentID1,direction,volume=1):
         if errorId != 0 :
             print errorId,errorMsg
             raise Exception(u'头寸创建失败')
+
         price0 = data.openPrice
         print 'i0:做多:openPrice =',data.openPrice
 
@@ -62,6 +63,7 @@ def openPair(trader,instrumentID0,instrumentID1,direction,volume=1):
         print 'i0:做空:openPrice =',data.openPrice
         price0 = data.openPrice
 
+        return price0,price1
 
 
 def onDataArrived(data,trader):
@@ -95,33 +97,33 @@ def onDataArrived(data,trader):
     if bid0 != 0 and bid1 !=0:
         diff = bid1 - bid0
         diffs.append(diff)
-        if len(diffs) > 350:
+        if len(diffs) > 50:
             s = Series(diffs)
             pts = diff - s.mean()
-            if abs(pts) > 3 :
+            if abs(pts) > 2.5:
                 if pts > 0 and lastDirection <= 0:
                     lastDirection = 1
-                    print '开仓条件触发,头寸方向:',lastDirection
-                    print 'bid0 =',bid0,'bid1 =',bid1,'ask0 =',ask0,'ask1 =',ask1
-                    print 'diff =',diff,'偏离值 =',pts
+                    print '开仓条件触发,头寸方向:', lastDirection
+                    print 'bid0 =', bid0, 'bid1 =', bid1, 'ask0 =', ask0, 'ask1 =', ask1
+                    print 'diff =', diff, '偏离值 =', pts
                     trader.closeAll()
-                    price0,price1=openPair(trader,instrumentID0,instrumentID1,lastDirection)
-                    print '实际价差 =',price1-price0-s.mean()
-                    print '买盘滑点 =',price0-bid0
-                    print '卖盘滑点 =',ask1-price1
+                    price0, price1 = openPair(trader, instrumentID0, instrumentID1, lastDirection)
+                    print '实际价差 =', price1 - price0 - s.mean()
+                    print '买盘滑点 =', price0 - bid0
+                    print '卖盘滑点 =', ask1 - price1
                 if pts < 0 and lastDirection >= 0:
                     lastDirection = -1
-                    print '开仓条件触发,头寸方向:',lastDirection
-                    print 'bid0 =',bid0,'bid1 =',bid1,'ask0 =',ask0,'ask1 =',ask1
-                    print 'diff =',diff,'偏离值 =',pts
+                    print '开仓条件触发,头寸方向:', lastDirection
+                    print 'bid0 =', bid0, 'bid1 =', bid1, 'ask0 =', ask0, 'ask1 =', ask1
+                    print 'diff =', diff, '偏离值 =', pts
                     trader.closeAll()
-                    openPair(trader,instrumentID0,instrumentID1,lastDirection)
-                    print '实际价差 =',price0-price1-s.mean()
-                    print '买盘滑点 =',price1-bid1
-                    print '卖盘滑点 =',ask0-price0
+                    price0, price1 = openPair(trader, instrumentID0, instrumentID1, lastDirection)
+                    print '实际价差 =',s.mean() - (price1 - price0)
+                    print '买盘滑点 =', price1 - bid1
+                    print '卖盘滑点 =', ask0 - price0
             else:
-                if count % 30 == 0 :
-                    print '平均点差 =',s.mean(),'diff =',diff,'偏离值 =',pts
+                if count % 30 == 0:
+                    print '平均点差 =', s.mean(), 'diff =', diff, '偏离值 =', pts
 
 def onExit(trader):
     '''
