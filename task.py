@@ -5,7 +5,6 @@
 from comhelper import setDjangoEnvironment
 setDjangoEnvironment()
 from database.models import ModelDepthMarketData
-
 import argparse
 
 
