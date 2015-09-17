@@ -37,6 +37,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
+    'django_nose',
     'database'
 )
 
@@ -53,6 +54,7 @@ ROOT_URLCONF = 'CTPTrader.urls'
 
 WSGI_APPLICATION = 'CTPTrader.wsgi.application'
 
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 # Database
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
