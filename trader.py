@@ -115,7 +115,7 @@ class Trader(object):
 
     def onPendingOrderCanceled(self, orderId, order):
         """
-        挂单取消成功
+        挂单取消成功事件
         参数:
             orderId 发出挂单取消请求的报单单号,即cancelPendingOrder的返回值
             order 被取消的挂单的数据实体
@@ -125,7 +125,7 @@ class Trader(object):
 
     def onStopPriceSetted(self, orderId, position):
         """
-        止损设置成功
+        止损设置成功事件
         参数:
             orderId 发出止损修改的报单单号,即setStopPrice的返回值
             position 被操作影响的头寸数据实体
@@ -136,23 +136,46 @@ class Trader(object):
     def onOpenError(self, orderId, errorId, errorMsg):
         """
         头寸打开出错事件
+        参数:
+            orderId 创建头寸的原始报单单号,即openPosition的返回值
+            errorId 出错代码
+            errorMsg 出错提示信息
+        返回:无返回
         """
         pass
 
     def onCloseError(self, orderId, errorId, errorMsg, position=None):
         """
         头寸平仓出错事件
+        参数:
+            orderId 头寸平仓的原始报单单号,即closePosition的返回值
+            errorId 出错代码
+            errorMsg 出错提示信息
+            position 尝试影响的头寸数据实体
+        返回:无返回
         """
         pass
 
     def onSetStopPriceError(self, orderId, errorId, errorMsg, position=None):
         """
         设置止损出错
+        参数:
+            orderId 发出止损修改的报单单号,即setStopPrice的返回值
+            errorId 出错代码
+            errorMsg 出错提示信息
+            position 尝试影响的头寸数据实体
+        返回:无返回
         """
         pass
 
-    def onCancelPendingOrderError(self, orderId, errorId, errorMsg, order=None ):
+    def onCancelPendingOrderError(self, orderId, errorId, errorMsg, order=None):
         """
         取消挂单出错
+        参数:
+            orderId 发出挂单取消请求的报单单号,即cancelPendingOrder的返回值
+            errorId 出错代码
+            errorMsg 出错提示信息
+            order 尝试影响的挂单的数据实体
+        返回:无返回
         """
         pass
