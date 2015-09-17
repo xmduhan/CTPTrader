@@ -16,12 +16,26 @@ class Trader(object):
     def openPosition(self, instrumentId, direction, volume=1, limitPrice=0, stopPrice=0, profitPrice=0):
         """
         开仓操作
+        参数:
+        instrumentId 要建仓的交易品种标识
+        direction 头寸方向,'buy' 做多,'sell' 做空
+        volume 交易数量,默认为1手
+        limitPrice 限价单价格,默认为0,表示不限价
+        stopPrice 头寸止损价格,默认为0,表示不设置止损
+        profitPrice 头寸止盈价格,默认为0,表示不设置止盈
+        返回:
+        orderId 开仓报单单号
         """
         pass
 
     def closePostion(self, positionId, limitPrice=0):
         """
         平仓操作
+        参数:
+        positionId 要平仓的头寸的标识
+        limitPrice 平仓限价
+        返回:
+        orderId 平仓报单单号
         """
         pass
 
