@@ -65,7 +65,7 @@ class Trader(object):
         """
         头寸查询
         参数:
-            state 头寸状态,默认为'open',仅查询目前处于打开状态的头寸
+            state 头寸状态,默认为'open',默认仅查询目前处于打开状态的头寸
             kwargs 查询条件,django model查询参数格式
         返回:
             positionList 符合查询条件的头寸列表
@@ -83,55 +83,75 @@ class Trader(object):
         """
         pass
 
-    def onPositionOpened(self):
+    def onPositionOpened(self, orderId, position):
         """
         头寸建立事件
+        参数:
+            orderId 创建头寸的原始报单单号,即openPosition的返回值
+            position 新创建的头寸的数据实体
+        返回:无返回
         """
         pass
 
-    def onPendingOrderCreated(self):
+    def onPendingOrderCreated(self, orderId, order):
         """
         挂单创建事件
+        参数:
+            orderId 创建挂单的原始报单单号,即openPosition或closePosition返回值
+            order 挂单的数据实体
+        返回:无返回
         """
         pass
 
-    def onPostionClosed(self):
+    def onPostionClosed(self, orderId, position):
         """
         头寸平仓事件
+        参数:
+            orderId 头寸平仓的原始报单单号,即closePosition的返回值
+            position 被平仓的头寸的数据实体
+        返回:无返回
         """
         pass
 
-    def onPendingOrderCanceled(self):
+    def onPendingOrderCanceled(self, orderId, order):
         """
         挂单取消成功
+        参数:
+            orderId 发出挂单取消请求的报单单号,即cancelPendingOrder的返回值
+            order 被取消的挂单的数据实体
+        返回:无返回
         """
         pass
 
-    def onStopPriceSetted(self, args):
+    def onStopPriceSetted(self, orderId, position):
         """
         止损设置成功
+        参数:
+            orderId 发出止损修改的报单单号,即setStopPrice的返回值
+            position 被操作影响的头寸数据实体
+        返回:无返回
         """
         pass
 
-    def onOpenError(self, arg):
+    def onOpenError(self, orderId, errorId, errorMsg):
         """
         头寸打开出错事件
         """
         pass
 
-    def onCloseError(self, arg):
+    def onCloseError(self, orderId, errorId, errorMsg, position=None):
         """
         头寸平仓出错事件
         """
         pass
 
-    def onSetStopPriceError(self, args):
+    def onSetStopPriceError(self, orderId, errorId, errorMsg, position=None):
         """
         设置止损出错
         """
         pass
 
-    def onCancelPendingOrderError(self):
+    def onCancelPendingOrderError(self, orderId, errorId, errorMsg, order=None ):
         """
         取消挂单出错
         """
