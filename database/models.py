@@ -5,14 +5,14 @@ import uuid
 
 # 数据源类型
 DATA_SOURCE_TYPE = (
-    ('Channel', u'CTP接口'),
-    ('Database', u'数据库')
+    ('ctpmd', u'CTP接口'),
+    ('database', u'数据库')
 )
 
 # 交易接口类型
 TRADER_TYPE = (
-    ('CTPTrader', u'CTP交易接口'),
-    ('SimulateTrader', u'模拟交易接口')
+    ('ctp', u'CTP交易接口'),
+    ('simulate', u'模拟交易接口')
 )
 
 # 交易方向
@@ -35,7 +35,10 @@ ORDER_ACTION = (
     ('open', u'开仓'),
     ('close', u'平仓'),
     ('openlimit', u'限价开仓'),
-    ('closelimit', u'限价平仓')
+    ('closelimit', u'限价平仓'),
+    ('cancel', u'取消'),
+    ('setstop', u'设置止损'),
+    ('setprofit', u'设置止盈')
 )
 
 # 报单状态
