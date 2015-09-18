@@ -3,6 +3,49 @@ from django.db import models
 from datetime import datetime
 import uuid
 
+# 数据源类型
+DATA_SOURCE_TYPE = (
+    ('Channel', u'CTP接口'),
+    ('Database', u'数据库')
+)
+
+# 交易接口类型
+TRADER_TYPE = (
+    ('CTPTrader', u'CTP交易接口'),
+    ('SimulateTrader', u'模拟交易接口')
+)
+
+# 交易方向
+TRADING_DIRECTION = (
+    ('buy', u'做多'),
+    ('sell', u'做空')
+)
+
+# 头寸状态
+POSITION_STATE = (
+    ('preopen', u'预开仓'),
+    ('open', u'开仓'),
+    ('preclose', u'预平仓'),
+    ('close', u'平仓'),
+    ('cancel', u'取消')
+)
+
+# 报单类型
+ORDER_ACTION = (
+    ('open', u'开仓'),
+    ('close', u'平仓'),
+    ('openlimit', u'限价开仓'),
+    ('closelimit', u'限价平仓')
+)
+
+# 报单状态
+ORDER_STATE = (
+    ('insert', u'报入'),
+    ('finish', u'完成'),
+    ('error', u'出错'),
+    ('cancel', u'取消')
+)
+
 
 def getBroadcastAddress():
     ''' 获取个随机的数据广播地址 '''
@@ -14,72 +57,27 @@ class ModelAccount(models.Model):
     对应CTP的账号信息配置
     '''
     # 名称(name)
-    name = models.CharField(u'名称',max_length=100)
+    name = models.CharField(u'名称', max_length=100)
     # 说明(remarks)
-    remarks = models.CharField(u'说明',max_length=500)
+    remarks = models.CharField(u'说明', max_length=500)
     # 交易服务器地址(frontAddress)
-    frontAddress = models.CharField(u'交易服务器地址',max_length=100,blank=True, null=True)
+    frontAddress = models.CharField(u'交易服务器地址', max_length=100, blank=True, null=True)
     # 行情服务器地址(mdFrontAddress)
-    mdFrontAddress = models.CharField(u'行情服务器地址',max_length=100,blank=True, null=True)
+    mdFrontAddress = models.CharField(u'行情服务器地址', max_length=100, blank=True, null=True)
     # 代理商编号(brokerID)
-    brokerID = models.CharField(u'代理商编号',max_length=50,blank=True, null=True)
+    brokerID = models.CharField(u'代理商编号', max_length=50, blank=True, null=True)
     # 用户编号(userID
-    userID = models.CharField(u'用户编号',max_length=50,blank=True, null=True)
+    userID = models.CharField(u'用户编号', max_length=50, blank=True, null=True)
     # 密码(password)
-    password = models.CharField(u'密码',max_length=50,blank=True, null=True)
+    password = models.CharField(u'密码', max_length=50, blank=True, null=True)
 
     def __unicode__(self):
-        return  '<%s,%s>' % (unicode(self.id),self.name)
+        return '<%s,%s>' % (unicode(self.id), self.name)
 
     class Meta:
         verbose_name = u'账号'
         verbose_name_plural = u'[01].账号'
         ordering = ['name']
-
-
-class ModelTask(models.Model):
-    '''
-    任务是数据生成器或策略执行器的执行实例，为了逻辑清晰,一个数据生成器或策略执行器只允许有一个执行实例。
-    '''
-    # 任务类型(type)
-    TASK_TYPE = (('DataGenerator', '数据生成器'), ('StrategyExecuter', u'策略执行器'))
-    type = models.CharField(u'任务类型', max_length=30,choices=TASK_TYPE)
-    # 对应类型配置项(typeRelaId)
-    typeRelaId = models.CharField(u'对应的任务配置',max_length=100)
-    # 名称(name)
-    name = models.CharField(u'名称',max_length=100)
-    # 进程标识(pid)
-    pid = models.IntegerField(u'进程标识')
-    # 启动时间(startTime)
-    startTime = models.DateTimeField(u'启动时间', default=datetime.now)
-    # 结束时间(endTime)
-    endTime = models.DateTimeField(u'结束时间', blank=True, null=True)
-    # 状态(state)
-    TASK_STATE = ( ('A', u'运行'), ('P', u'停止'))
-    state = models.CharField(u'状态', max_length=10,choices=TASK_STATE, default='A')
-
-    class Meta:
-        verbose_name = u'任务'
-        verbose_name_plural = u'[02].任务'
-        ordering = ['name']
-
-
-class ModelTaskLog(models.Model):
-    '''
-    任务的执行日志
-    '''
-    # 任务(task)
-    task = models.ForeignKey('ModelTask',verbose_name=u'任务')
-    # 日志时间(logTime)
-    logTime = models.DateTimeField(u'日志时间', default=datetime.now)
-    # 日志信息(logMessage)
-    logMessage = models.CharField(u'日志信息',max_length=1000)
-
-
-    class Meta:
-        verbose_name = u'任务日志'
-        verbose_name_plural = u'[03].任务日志'
-        ordering = ['logTime']
 
 
 class ModelDataCatalog(models.Model):
@@ -105,7 +103,7 @@ class ModelDepthMarketData(models.Model):
     深度行情数据存储(对应CTP数据结构CThostFtdcDepthMarketDataField)
     '''
     # 所属的目录(catalog)
-    dataCatalog = models.ForeignKey('ModelDataCatalog',verbose_name=u'所属数据目录')
+    dataCatalog = models.ForeignKey('ModelDataCatalog', verbose_name=u'所属数据目录')
     # 数据时间(相当于TradingDay+UpdateTime+UpdateMillisec)
     dataTime = models.DateTimeField(u'数据时间')
 
@@ -165,30 +163,29 @@ class ModelDataGenerator(models.Model):
     数据生成器配置
     '''
     # 名称(name)
-    name = models.CharField(u'名称',max_length=100)
+    name = models.CharField(u'名称', max_length=100)
     # 账号(account)
-    account = models.ForeignKey('ModelAccount',verbose_name=u'账号')
+    account = models.ForeignKey('ModelAccount', verbose_name=u'账号')
     # 所属的目录(dataCatalog)
-    dataCatalog = models.ForeignKey('ModelDataCatalog',verbose_name=u'所属数据目录')
+    dataCatalog = models.ForeignKey('ModelDataCatalog', verbose_name=u'所属数据目录')
     # 数据源(dataSource)
-    DATA_SOURCE_TYPE = (('Channel',u'CTP接口'),('Database',u'数据库'))
-    dataSource = models.CharField(u'数据源', max_length=30,choices=DATA_SOURCE_TYPE)
+    dataSource = models.CharField(u'数据源', max_length=30, choices=DATA_SOURCE_TYPE)
     # 数据起始时间(datetimeBegin)
-    datetimeBegin = models.DateTimeField(u'数据起始时间',blank=True, null=True)
+    datetimeBegin = models.DateTimeField(u'数据起始时间', blank=True, null=True)
     # 数据结束时间(datetimeEnd)
-    datetimeEnd = models.DateTimeField(u'数据结束时间',blank=True, null=True)
+    datetimeEnd = models.DateTimeField(u'数据结束时间', blank=True, null=True)
     # 品种列表(instrumentIDList) json数据格式
-    instrumentIDList = models.CharField(u'品种列表',max_length=500)
+    instrumentIDList = models.CharField(u'品种列表', max_length=500)
     # 是否保存原始数据流(saveRawData)
-    saveRawData = models.BooleanField(u'是否保存原始数据流',default=False)
+    saveRawData = models.BooleanField(u'是否保存原始数据流', default=False)
     # 是否保存棒线数据(saveBarData)
-    saveBarData = models.BooleanField(u'是否保存棒线数据',default=False)
+    saveBarData = models.BooleanField(u'是否保存棒线数据', default=False)
     # 是否保存指标数据(saveIndexData)
-    saveIndexData = models.BooleanField(u'是否保存指标数据',default=False)
+    saveIndexData = models.BooleanField(u'是否保存指标数据', default=False)
     # 数据广播地址(broadcastAddress)
-    broadcastAddress = models.CharField(u'数据广播地址',max_length=100,default = getBroadcastAddress)
+    broadcastAddress = models.CharField(u'数据广播地址', max_length=100, default=getBroadcastAddress)
     # 数据生成间隔时间(interval) 以秒为单位
-    interval = models.FloatField(u'数据生成间隔时间',default=.5)
+    interval = models.FloatField(u'数据生成间隔时间', default=.5)
 
     class Meta:
         verbose_name = u'数据生成器'
@@ -200,27 +197,27 @@ class ModelStrategyExecuter(models.Model):
     策略执行器
     '''
     # 名称(name)
-    name = models.CharField(u'名称',max_length=100)
+    name = models.CharField(u'名称', max_length=100)
     # 账号(account)
-    account = models.ForeignKey('ModelAccount',verbose_name=u'账号')
+    account = models.ForeignKey('ModelAccount', verbose_name=u'账号')
+    # 数据生成器(dataGenerator)
+    dataGenerator = models.ForeignKey('ModelDataGenerator', verbose_name=u'数据生成器')
     # 策略程序所在目录(strategyDir)
-    strategyDir = models.CharField(u'策略程序所在目录',max_length=500)
+    strategyDir = models.CharField(u'策略程序所在目录', max_length=500)
     # 策略程序名称(strategyProgram)
-    strategyProgram = models.CharField(u'策略程序名称',max_length=100)
+    strategyProgram = models.CharField(u'策略程序名称', max_length=100)
     # 策略配置文件(strategyConfig)
-    strategyConfig = models.CharField(u'策略配置文件',max_length=100)
-    # 数据接收地址(receiveAddress)
-    receiveAddress = models.CharField(u'数据接收地址',max_length=100)
+    strategyConfig = models.CharField(u'策略配置文件', max_length=100)
     # 品种列表(instrumentIDList)
-    instrumentIDList = models.CharField(u'品种列表',max_length=500)
+    instrumentIDList = models.CharField(u'品种列表', max_length=500)
     # 默认头寸大小(volume)
     volume = models.FloatField(u'默认头寸大小', default=1)
     # 最大做多头寸数量(maxBuyPosition)
     maxBuyPosition = models.IntegerField(u'最大做多头寸数量', default=1)
     # 最大做空头寸数量(maxSellPosition)
     maxSellPosition = models.IntegerField(u'最大做多头寸数量', default=1)
-    # 是否模拟交易(simulate)
-    simulate = models.BooleanField(u'是否模拟交易',default=True)
+    # 交易接口类型(traderType)
+    traderType = models.CharField(u'数据源', max_length=30, choices=TRADER_TYPE)
 
     class Meta:
         verbose_name = u'策略执行器'
@@ -232,37 +229,41 @@ class ModelPosition(models.Model):
     交易记录
     '''
     # 头寸标识(positionId) TODO 可否直接使用Position的id
-    # 任务(task)
-    task = models.ForeignKey('ModelTask',verbose_name=u'任务',blank=True,null=True)
     # 策略执行器(strategyExecuter)
-    strategyExecuter = models.ForeignKey('ModelStrategyExecuter',verbose_name=u'策略执行器',blank=True,null=True)
-    # 是否模拟交易(simulate)
-    simulate = models.BooleanField(u'是否模拟交易',default=True)
+    strategyExecuter = models.ForeignKey('ModelStrategyExecuter', verbose_name=u'策略执行器', blank=True, null=True)
+    # 交易接口类型(traderType)
+    traderType = models.CharField(u'数据源', max_length=30, choices=TRADER_TYPE)
     # 品种(instrumentID)
-    instrumentID = models.CharField(u'品种',max_length=50)
+    instrumentID = models.CharField(u'品种', max_length=50)
     # 交易方向(tradingDirection)
-    TRADING_DIRECTION = (('buy',u'做多'),('sell',u'做空'))
-    directionCode = models.CharField(u'交易方向代码', max_length=30,choices=TRADING_DIRECTION)
+    direction = models.CharField(u'交易方向代码', max_length=30, choices=TRADING_DIRECTION)
     # 交易数量(volume)
     volume = models.FloatField(u'交易数量')
     # 开仓时间(openTime)
     openTime = models.DateTimeField(u'开仓时间')
+    # 开仓限价(openLimitPrice)
+    openLimitPrice = models.FloatField(u'开仓限价', blank=True, null=True)
     # 开仓价格(openPrice)
-    openPrice = models.FloatField(u'开仓价格',blank=True,null=True)
+    openPrice = models.FloatField(u'开仓价格', blank=True, null=True)
     # 平仓时间(closeTime)
-    closeTime = models.DateTimeField(u'平仓时间',blank=True, null=True)
+    closeTime = models.DateTimeField(u'平仓时间', blank=True, null=True)
+    # 平仓限价(closeLimitPrice)
+    closeLimitPrice = models.FloatField(u'平仓限价', blank=True, null=True)
     # 平仓价格(closePrice)
-    closePrice = models.FloatField(u'平仓价格',blank=True, null=True)
+    closePrice = models.FloatField(u'平仓价格', blank=True, null=True)
+    # 止损价(stopPrice)
+    stopPrice = models.FloatField(u'止损价', blank=True, null=True)
+    # 止赢价(profitPrice)
+    profitPrice = models.FloatField(u'止赢价', blank=True, null=True)
     # 状态(state)
-    TRADING_STATE = (('preopen',u'预开仓'),('open',u'开仓'),('preclose',u'预平仓'),('close',u'平仓'))
-    state = models.CharField(u'状态', max_length=30,choices=TRADING_STATE)
-    # 上次操作出错代码(lastErrorId)
-    lastErrorID = models.IntegerField(u'上次操作出错代码', default=0)
-    # 上次操作出错信息(lastErrorMsg)
-    lastErrorMsg = models.CharField(u'上次操作出错信息',max_length=500, default='')
+    state = models.CharField(u'状态', max_length=30, choices=POSITION_STATE)
+    # 记录创建时间(createTime)
+    createTime = models.DateTimeField(u'记录创建时间')
+    # 记录修改时间
+    modifyTime = models.DateTimeField(u'记录修改时间')
 
     def __unicode__(self):
-        return '%d,%s,%.1f,%s' % (self.id,self.directionCode,self.volume,self.state)
+        return '%d,%s,%.1f,%s' % (self.id, self.directionCode, self.volume, self.state)
 
     def profit(self):
         if self.state != 'close':
@@ -272,56 +273,60 @@ class ModelPosition(models.Model):
         if self.directionCode == 'sell':
             return self.openPrice - self.closePrice
 
-
     class Meta:
         verbose_name = u'交易记录'
         verbose_name_plural = u'[08].交易记录'
-        ordering = ['openTime','closeTime']
-
+        ordering = ['openTime', 'closeTime']
 
 
 class ModelOrder(models.Model):
     '''
     报单记录
     '''
-    # 任务(task)
-    task = models.ForeignKey('ModelTask',verbose_name=u'任务',blank=True,null=True)
     # 策略执行器(strategyExecuter)
-    strategyExecuter = models.ForeignKey('ModelStrategyExecuter',verbose_name=u'策略执行器',blank=True,null=True)
+    strategyExecuter = models.ForeignKey('ModelStrategyExecuter', verbose_name=u'策略执行器', blank=True, null=True)
     # 头寸(Position)
-    position = models.ForeignKey('ModelPosition',verbose_name=u'头寸',blank=True,null=True)
+    position = models.ForeignKey('ModelPosition', verbose_name=u'头寸', blank=True, null=True)
     # 是否模拟交易(simulate)
-    simulate = models.BooleanField(u'是否模拟交易',default=True)
+    simulate = models.BooleanField(u'是否模拟交易', default=True)
     # 报单编号(orderRef)
-    orderRef = models.CharField(u'报单编号',max_length=50,blank=True,null=True)
+    orderRef = models.CharField(u'报单编号', max_length=50, blank=True, null=True)
     # 品种(instrumentID)
-    instrumentID = models.CharField(u'品种',max_length=50)
+    instrumentID = models.CharField(u'品种', max_length=50)
     # 报单类型(ation)
-    TRADING_ACTION = (('open',u'开仓'),('close',u'平仓'),('openlimit',u'限价开仓'),('closelimit',u'限价平仓'))
-    action = models.CharField(u'报单类型',max_length=50,blank=True,null=True)
+    action = models.CharField(u'报单类型', max_length=50, blank=True, null=True, choices=ORDER_ACTION)
     # 交易方向代码(directionCode)
-    TRADING_DIRECTION = (('buy',u'做多'),('sell',u'做空'))
-    directionCode = models.CharField(u'交易方向代码', max_length=30,choices=TRADING_DIRECTION)
+    direction = models.CharField(u'交易方向代码', max_length=30, choices=TRADING_DIRECTION)
     # 交易数量(volume)
     volume = models.FloatField(u'交易数量')
-    # 报单价格(price)
-    price = models.FloatField(u'报单价格')
-    # 价格条件类型
-    PRICE_CONDITION = (('immediate',u'立即单'),('limit',u'限价单'))
-    priceCondition = models.CharField(u'价格条件类型',max_length=50,choices=PRICE_CONDITION)
+    # 开仓限价(openLimitPrice)
+    openLimitPrice = models.FloatField(u'开仓限价', blank=True, null=True)
+    # 开仓价格(openPrice)
+    openPrice = models.FloatField(u'开仓价格', blank=True, null=True)
+    # 平仓限价(closeLimitPrice)
+    closeLimitPrice = models.FloatField(u'平仓限价', blank=True, null=True)
+    # 平仓价格(closePrice)
+    closePrice = models.FloatField(u'平仓价格', blank=True, null=True)
+    # 止损价(stopPrice)
+    stopPrice = models.FloatField(u'止损价', blank=True, null=True)
+    # 止赢价(profitPrice)
+    profitPrice = models.FloatField(u'止赢价', blank=True, null=True)
     # 报单时间(insertTime)
-    insertTime = models.DateField(u'报单时间',default=datetime.now)
+    insertTime = models.DateField(u'报单时间', default=datetime.now)
     # 完成时间(finishTime)
-    finishTime = models.DateField(u'完成时间',blank=True,null=True)
+    finishTime = models.DateField(u'完成时间', blank=True, null=True)
     # 报单状态(state)
-    ORDER_STATE = (('insert',u'报入'),('finish',u'完成'),('error',u'出错'))
-    state = models.CharField(u'报单状态',max_length=50)
+    state = models.CharField(u'报单状态', max_length=50, choices=ORDER_STATE)
     # 出错代码(lastErrorId)
     errorId = models.IntegerField('出错代码')
     # 出错信息(lastErrorMsg)
-    errorMsg = models.CharField(u'出错信息',max_length=500)
+    errorMsg = models.CharField(u'出错信息', max_length=500)
+    # 记录创建时间(createTime)
+    createTime = models.DateTimeField(u'记录创建时间')
+    # 记录修改时间
+    modifyTime = models.DateTimeField(u'记录修改时间')
 
     class Meta:
         verbose_name = u'报单记录'
         verbose_name_plural = u'[08].报单记录'
-        ordering = ['insertTime','finishTime']
+        ordering = ['insertTime', 'finishTime']

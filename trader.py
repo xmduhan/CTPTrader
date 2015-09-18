@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+from database.models import ModelPosition
 
 class Trader(object):
 
@@ -8,11 +9,11 @@ class Trader(object):
     交易接口类
     """
 
-    def __init__(self):
+    def __init__(self, executer=None):
         """
-        TODO: to be defined1.
+        相关的初始化操作
         """
-        pass
+        self.executer = executer
 
     def openPosition(self, instrumentId, direction, volume=1, limitPrice=0, stopPrice=0, profitPrice=0):
         """
@@ -27,7 +28,8 @@ class Trader(object):
         返回:
             orderId 开仓报单单号
         """
-        pass
+        position = ModelPosition()
+        position.save()
 
     def closePostion(self, positionId, limitPrice=0):
         """

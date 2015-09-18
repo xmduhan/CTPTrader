@@ -13,6 +13,7 @@
 1、tradingRecord需要改成Postion并增加，增加一个Order实体对象。(ok)
 
 #%% 待处理
+1、修改数据模型设计，去掉Task简化设计
 1、需要一个模拟的trader
 1、执行器不应该记录的是广播地址，而应该是对应的数据生成器对象
 1、需要一些测试用例来保持程序质量
@@ -112,7 +113,7 @@ print result[0],result[1],result[2]
 #%% 测试列出头寸
 print trader.getPositionList()
 
-#%% 仅列出打开的头寸 
+#%% 仅列出打开的头寸
 print trader.getPositionList(state = 'open')
 
 
@@ -175,6 +176,6 @@ from django_pandas.io import read_frame
 df = read_frame(ModelPosition.objects.filter(state='close'))
 df['profit'] = df.apply(lambda x: x.closePrice-x.openPrice if x.directionCode==u'做多' else x.openPrice-x.closePrice,axis=1)
 c1 = df.id > 340
-c2 = df.id < 1000  
+c2 = df.id < 1000
 df[c1&c2]['profit'].cumsum().plot()
 
