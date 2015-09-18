@@ -5,14 +5,14 @@ import uuid
 
 # 数据源类型
 DATA_SOURCE_TYPE = (
-    ('ctpmd', u'CTP接口'),
+    ('ctp', u'CTP接口'),
     ('database', u'数据库')
 )
 
 # 交易接口类型
 TRADER_TYPE = (
-    ('ctp', u'CTP交易接口'),
-    ('simulate', u'模拟交易接口')
+    ('ctp', u'CTP接口'),
+    ('simulate', u'模拟接口')
 )
 
 # 交易方向
@@ -33,8 +33,8 @@ POSITION_STATE = (
 # 报单类型
 ORDER_ACTION = (
     ('open', u'开仓'),
-    ('close', u'平仓'),
     ('openlimit', u'限价开仓'),
+    ('close', u'平仓'),
     ('closelimit', u'限价平仓'),
     ('cancel', u'取消'),
     ('setstop', u'设置止损'),
@@ -67,10 +67,10 @@ class ModelAccount(models.Model):
     frontAddress = models.CharField(u'交易服务器地址', max_length=100, blank=True, null=True)
     # 行情服务器地址(mdFrontAddress)
     mdFrontAddress = models.CharField(u'行情服务器地址', max_length=100, blank=True, null=True)
-    # 代理商编号(brokerID)
-    brokerID = models.CharField(u'代理商编号', max_length=50, blank=True, null=True)
-    # 用户编号(userID
-    userID = models.CharField(u'用户编号', max_length=50, blank=True, null=True)
+    # 代理商编号(brokerId)
+    brokerId = models.CharField(u'代理商编号', max_length=50, blank=True, null=True)
+    # 用户编号(userId)
+    userId = models.CharField(u'用户编号', max_length=50, blank=True, null=True)
     # 密码(password)
     password = models.CharField(u'密码', max_length=50, blank=True, null=True)
 
@@ -88,12 +88,12 @@ class ModelDataCatalog(models.Model):
     数据目录
     '''
     # 名称(name)
-    name = models.CharField(u'名称',max_length=100)
+    name = models.CharField(u'名称', max_length=100)
     # 说明(remarks)
-    remarks = models.CharField(u'说明',max_length=500)
+    remarks = models.CharField(u'说明', max_length=500)
 
     def __unicode__(self):
-        return  '<%s,%s>' % (unicode(self.id),self.name)
+        return '<%s,%s>' % (unicode(self.id), self.name)
 
     class Meta:
         verbose_name = u'数据目录'
@@ -104,6 +104,10 @@ class ModelDataCatalog(models.Model):
 class ModelDepthMarketData(models.Model):
     '''
     深度行情数据存储(对应CTP数据结构CThostFtdcDepthMarketDataField)
+    NOTE: 由于CTP中命名id都使用"ID",但是我们通常的命名规范中使用的是"Id",
+    该类的需要直接从ctp接口读取数据,所以这里保留了"ID"的使用,以方便从CTP接口
+    读取数据,此类以外的所有id都应该书写成"Id"
+
     '''
     # 所属的目录(catalog)
     dataCatalog = models.ForeignKey('ModelDataCatalog', verbose_name=u'所属数据目录')
@@ -177,8 +181,8 @@ class ModelDataGenerator(models.Model):
     datetimeBegin = models.DateTimeField(u'数据起始时间', blank=True, null=True)
     # 数据结束时间(datetimeEnd)
     datetimeEnd = models.DateTimeField(u'数据结束时间', blank=True, null=True)
-    # 品种列表(instrumentIDList) json数据格式
-    instrumentIDList = models.CharField(u'品种列表', max_length=500)
+    # 品种列表(instrumentIdList) json数据格式
+    instrumentIdList = models.CharField(u'品种列表', max_length=500)
     # 是否保存原始数据流(saveRawData)
     saveRawData = models.BooleanField(u'是否保存原始数据流', default=False)
     # 是否保存棒线数据(saveBarData)
@@ -211,8 +215,8 @@ class ModelStrategyExecuter(models.Model):
     strategyProgram = models.CharField(u'策略程序名称', max_length=100)
     # 策略配置文件(strategyConfig)
     strategyConfig = models.CharField(u'策略配置文件', max_length=100)
-    # 品种列表(instrumentIDList)
-    instrumentIDList = models.CharField(u'品种列表', max_length=500)
+    # 品种列表(instrumentIdList)
+    instrumentIdList = models.CharField(u'品种列表', max_length=500)
     # 默认头寸大小(volume)
     volume = models.FloatField(u'默认头寸大小', default=1)
     # 最大做多头寸数量(maxBuyPosition)
@@ -236,8 +240,8 @@ class ModelPosition(models.Model):
     strategyExecuter = models.ForeignKey('ModelStrategyExecuter', verbose_name=u'策略执行器', blank=True, null=True)
     # 交易接口类型(traderType)
     traderType = models.CharField(u'数据源', max_length=30, choices=TRADER_TYPE)
-    # 品种(instrumentID)
-    instrumentID = models.CharField(u'品种', max_length=50)
+    # 品种(instrumentId)
+    instrumentId = models.CharField(u'品种', max_length=50)
     # 交易方向(tradingDirection)
     direction = models.CharField(u'交易方向代码', max_length=30, choices=TRADING_DIRECTION)
     # 交易数量(volume)
@@ -294,8 +298,8 @@ class ModelOrder(models.Model):
     simulate = models.BooleanField(u'是否模拟交易', default=True)
     # 报单编号(orderRef)
     orderRef = models.CharField(u'报单编号', max_length=50, blank=True, null=True)
-    # 品种(instrumentID)
-    instrumentID = models.CharField(u'品种', max_length=50)
+    # 品种(instrumentId)
+    instrumentId = models.CharField(u'品种', max_length=50)
     # 报单类型(ation)
     action = models.CharField(u'报单类型', max_length=50, blank=True, null=True, choices=ORDER_ACTION)
     # 交易方向代码(directionCode)

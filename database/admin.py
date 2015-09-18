@@ -7,9 +7,9 @@ from models import *
 class AccountAdmin(admin.ModelAdmin):
     ''' '''
 
-    fields = ['name','remarks','frontAddress','mdFrontAddress','brokerID','userID','password']
+    fields = ['name','remarks','frontAddress','mdFrontAddress','brokerId','userId','password']
 
-    list_display = ['id','name','frontAddress','brokerID','userID']
+    list_display = ['id','name','frontAddress','brokerId','userId']
 
 admin.site.register(ModelAccount,AccountAdmin)
 
@@ -80,7 +80,7 @@ class DataGeneratorAdmin(admin.ModelAdmin):
     ''' '''
 
     fields = ['name','account','dataCatalog','dataSource','datetimeBegin','datetimeEnd',\
-        'instrumentIDList','saveRawData','saveBarData','saveIndexData','broadcastAddress','interval']
+        'instrumentIdList','saveRawData','saveBarData','saveIndexData','broadcastAddress','interval']
 
     list_display = ['id','name','account','dataCatalog','dataSource','broadcastAddress']
 
@@ -93,10 +93,10 @@ class StrategyExecuterAdmin(admin.ModelAdmin):
     ''' '''
 
     fields = ['name','account','strategyDir','strategyProgram','strategyConfig',\
-    'receiveAddress',    'instrumentIDList','volume','maxBuyPosition',\
+    'receiveAddress',    'instrumentIdList','volume','maxBuyPosition',\
     'maxSellPosition','simulate']
 
-    list_display = ['id','name','account','receiveAddress','instrumentIDList','simulate']
+    list_display = ['id','name','account','receiveAddress','instrumentIdList','simulate']
 
     #list_filter = []
 
@@ -106,24 +106,24 @@ admin.site.register(ModelStrategyExecuter,StrategyExecuterAdmin)
 class PositionAdmin(admin.ModelAdmin):
     ''' '''
 
-    fields = ['task','strategyExecuter','instrumentID','directionCode','volume',\
-    'openPrice','closePrice','state','simulate','lastErrorID','lastErrorMsg']
+    fields = ['task','strategyExecuter','instrumentId','directionCode','volume',\
+    'openPrice','closePrice','state','simulate','lastErrorId','lastErrorMsg']
 
-    list_display = ['id','task','strategyExecuter','instrumentID','directionCode',\
+    list_display = ['id','task','strategyExecuter','instrumentId','directionCode',\
         'openPrice','closePrice','volume','state','simulate','profit']
 
-    list_filter = ['state','directionCode','instrumentID','strategyExecuter','simulate']
+    list_filter = ['state','directionCode','instrumentId','strategyExecuter','simulate']
 
 admin.site.register(ModelPosition,PositionAdmin)
 
 
 class OrderAdmin(admin.ModelAdmin):
     ''' '''
-    fields = ['task','strategyExecuter','position','simulate','orderRef','instrumentID',\
+    fields = ['task','strategyExecuter','position','simulate','orderRef','instrumentId',\
         'action','directionCode','volume','price','priceCondition','insertTime','finishTime',\
         'state','errorId','errorMsg']
 
-    list_display = ['orderRef','instrumentID','action','directionCode','volume','price',\
+    list_display = ['orderRef','instrumentId','action','directionCode','volume','price',\
             'priceCondition','insertTime','finishTime','state']
 
     list_filter = ['task','strategyExecuter','simulate']
