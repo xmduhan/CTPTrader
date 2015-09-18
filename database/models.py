@@ -104,15 +104,11 @@ class ModelDataCatalog(models.Model):
 class ModelDepthMarketData(models.Model):
     '''
     深度行情数据存储(对应CTP数据结构CThostFtdcDepthMarketDataField)
-    NOTE: 由于CTP中命名id都使用"ID",但是我们通常的命名规范中使用的是"Id",
-    该类的需要直接从ctp接口读取数据,所以这里保留了"ID"的使用,以方便从CTP接口
-    读取数据,此类以外的所有id都应该书写成"Id"
-
+    NOTE: 该Model中的字段命名不符合我们通常的习惯:(1)字段大写开头,(2)"Id"写为"ID".
+    这主要是为了能够方便的从CTP接口中读取数据
     '''
     # 所属的目录(catalog)
     dataCatalog = models.ForeignKey('ModelDataCatalog', verbose_name=u'所属数据目录')
-    # 数据时间(相当于TradingDay+UpdateTime+UpdateMillisec)
-    dataTime = models.DateTimeField(u'数据时间')
 
     # CThostFtdcDepthMarketDataField 字段定义
     TradingDay = models.CharField(u'交易日', max_length=9, default='')

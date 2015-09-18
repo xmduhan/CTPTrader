@@ -2,3 +2,5 @@
 db.sqlite3
 *.con
 *.*-journal
+.ipynb_checkpoints/
+*.ipynb
