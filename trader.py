@@ -3,6 +3,7 @@
 
 from database.models import ModelPosition
 
+
 class Trader(object):
 
     """
