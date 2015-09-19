@@ -16,7 +16,12 @@
 
 #%% 待处理
 
+1、绑定时间相关代码
 1、order还是orderId时个大问题
+1、编写测试用例
+
+
+
 1、traderType如何表示是个问题,目前('ctp','simulate'),是否直接存储类名称更好
 1、一定需要openlimit和closelimit两种订单类型吗?
 1、需要一个模拟的trader
