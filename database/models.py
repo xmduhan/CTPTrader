@@ -271,9 +271,9 @@ class ModelPosition(models.Model):
     def profit(self):
         if self.state != 'close':
             return 0
-        if self.directionCode == 'buy':
+        if self.direction == 'buy':
             return self.closePrice - self.openPrice
-        if self.directionCode == 'sell':
+        if self.direction == 'sell':
             return self.openPrice - self.closePrice
 
     class Meta:
