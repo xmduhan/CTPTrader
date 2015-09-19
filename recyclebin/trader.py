@@ -129,7 +129,7 @@ class Trader(object):
         contingentCondition 触发条件 char
         //// THOST_FTDC_CC_Immediately '1' 立即
         //// THOST_FTDC_CC_Touch '2' 止损
-        //// THOST_FTDC_CC_TouchProfit '3' 止赢
+        //// THOST_FTDC_CC_TouchProfit '3' 止盈
         //// THOST_FTDC_CC_ParkedOrder '4' 预埋单
         //// THOST_FTDC_CC_LastPriceGreaterThanStopPrice '5' 最新价大于条件价
         //// THOST_FTDC_CC_LastPriceGreaterEqualStopPrice '6' 最新价大于等于条件价
@@ -147,7 +147,7 @@ class Trader(object):
         forceCloseReason 强平原因 char
         //// THOST_FTDC_CC_Immediately '1' 立即
         //// THOST_FTDC_CC_Touch '2' 止损
-        //// THOST_FTDC_CC_TouchProfit '3' 止赢
+        //// THOST_FTDC_CC_TouchProfit '3' 止盈
         //// THOST_FTDC_CC_ParkedOrder '4' 预埋单
         //// THOST_FTDC_CC_LastPriceGreaterThanStopPrice '5' 最新价大于条件价
         //// THOST_FTDC_CC_LastPriceGreaterEqualStopPrice '6' 最新价大于等于条件价

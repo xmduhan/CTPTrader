@@ -64,6 +64,17 @@ class Trader(object):
         """
         pass
 
+    def setProfitPrice(self, positionId, ProfitPrice):
+        """
+        设置头寸的止盈线
+        参数:
+            positionId 对应头寸的标识
+            ProfitPrice 止盈价格
+        返回:
+            orderId 止损修改单单号
+        """
+        pass
+
     def listPosition(self, state='open', **kwargs):
         """
         头寸查询
@@ -136,6 +147,16 @@ class Trader(object):
         """
         pass
 
+    def onProfitPriceSetted(self, orderId, position):
+        """
+        止盈设置成功事件
+        参数:
+            orderId 发出止损修改的报单单号,即setProfitPrice的返回值
+            position 被操作影响的头寸数据实体
+        返回:无返回
+        """
+        pass
+
     def onOpenError(self, orderId, errorId, errorMsg):
         """
         头寸打开出错事件
@@ -164,6 +185,18 @@ class Trader(object):
         设置止损出错
         参数:
             orderId 发出止损修改的报单单号,即setStopPrice的返回值
+            errorId 出错代码
+            errorMsg 出错提示信息
+            position 尝试影响的头寸数据实体
+        返回:无返回
+        """
+        pass
+
+    def onSetProfitPriceError(self, orderId, errorId, errorMsg, position=None):
+        """
+        设置止盈出错
+        参数:
+            orderId 发出止损修改的报单单号,即setProfitPrice的返回值
             errorId 出错代码
             errorMsg 出错提示信息
             position 尝试影响的头寸数据实体
