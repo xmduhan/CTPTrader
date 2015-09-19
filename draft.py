@@ -11,11 +11,15 @@
 1、数据生成器进程基本代码(ok)
 1、关于instrumentID 和 instrumentID 的冲突问题(ok)
 1、tradingRecord需要改成Postion并增加，增加一个Order实体对象。(ok)
+1、修改数据模型设计，去掉Task简化设计(ok)
+1、执行器不应该记录的是广播地址，而应该是对应的数据生成器对象(ok)
 
 #%% 待处理
-1、修改数据模型设计，去掉Task简化设计
+
+1、order还是orderId时个大问题
+1、traderType如何表示是个问题,目前('ctp','simulate'),是否直接存储类名称更好
+1、一定需要openlimit和closelimit两种订单类型吗?
 1、需要一个模拟的trader
-1、执行器不应该记录的是广播地址，而应该是对应的数据生成器对象
 1、需要一些测试用例来保持程序质量
 1、trader.orderInsert参数的大小写问题
 1、策略执行器进程代码

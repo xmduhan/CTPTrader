@@ -1,43 +1,76 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-from database.models import ModelPosition
+from database.models import ModelPosition,ModelOrder
 
 
 class Trader(object):
 
     """
-    交易接口类
+    交易接口类,主要实现以下功能:
+    1.定义接口类的方法框架
+    2.交易数据存储的处理
+    3.回调事件的绑定
+    NOTE:
+    1.Trader已经定义了接口方法,单仅实现了数据存储部分,实际的交易触发动作没有实现.
+    2.Trader已经详细定义回调事件的结构和触发后要进行的处理,但是事件如何触发并没有实现.
+    TODO:
+    对于Trader的子类来说,需要做的事情就是:
+    1. 重载接口方法(如:openPosition)，增加实际交易动作的触发操作(实际是发信号到工作线程)
+    2. 编写工作线程,让它一方面和接口函数通讯,一方面和"服务器"(不一定时真的服务器)通讯,并回调方式触发事件.
+    3. 子类甚至可以不需要重载回调方法,除非子类有特殊的数据存储需要
     """
 
-    def __init__(self, executer=None):
+    def __init__(self, strategyExecuter):
         """
         相关的初始化操作
         """
-        self.executer = executer
+        self.strategyExecuter = strategyExecuter
 
-    def openPosition(self, instrumentId, direction, volume=1, limitPrice=0, stopPrice=0, profitPrice=0):
+    def openPosition(self, instrumentId, direction, volume=1, OpenLimitPrice=0, stopPrice=0, profitPrice=0):
         """
         开仓操作
         参数:
             instrumentId 要建仓的交易品种标识
             direction 头寸方向,'buy' 做多,'sell' 做空
             volume 交易数量,默认为1手
-            limitPrice 限价单价格,默认为0,表示不限价
+            OpenLimitPrice 限价单价格,默认为0,表示不限价
             stopPrice 头寸止损价格,默认为0,表示不设置止损
             profitPrice 头寸止盈价格,默认为0,表示不设置止盈
         返回:
             orderId 开仓报单单号
         """
-        position = ModelPosition()
+        data = {
+            'strategyExecuter': self.strategyExecuter,
+            'traderClass': self.__class__.__name__,
+            'instrumentId': instrumentId,
+            'direction': direction,
+            'volume': volume,
+            'OpenLimitPrice': OpenLimitPrice,
+            'stopPrice': stopPrice,
+            'profitPrice': profitPrice,
+        }
+
+        # 创建头寸数据
+        position = ModelPosition(**data)
+        position.state = 'preopen'
         position.save()
 
-    def closePostion(self, positionId, limitPrice=0):
+        # 创建报单数据
+        order = ModelOrder(**data)
+        order.position = position
+        order.action = 'open'
+        order.state = 'insert'
+        order.save()
+
+        return order.id
+
+    def closePostion(self, positionId, closeLimitPrice=0):
         """
         平仓操作
         参数:
             positionId 要平仓的头寸的标识
-            limitPrice 平仓限价
+            closeLimitPrice 平仓限价
         返回:
             orderId 平仓报单单号
         """

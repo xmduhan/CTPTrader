@@ -10,9 +10,16 @@ DATA_SOURCE_TYPE = (
 )
 
 # 交易接口类型
-TRADER_TYPE = (
-    ('ctp', u'CTP接口'),
-    ('simulate', u'模拟接口')
+# TRADER_TYPE = (
+#     ('ctp', u'CTP接口'),
+#     ('simulate', u'模拟接口')
+# )
+
+# 交易接口类型
+TRADER_CLASS = (
+    ('Trader', 'Trader'),
+    ('SimulateTrader', 'SimulateTrader'),
+    ('CTPTrader', 'CTPTrader'),
 )
 
 # 交易方向
@@ -33,9 +40,9 @@ POSITION_STATE = (
 # 报单类型
 ORDER_ACTION = (
     ('open', u'开仓'),
-    ('openlimit', u'限价开仓'),
+    # ('openlimit', u'限价开仓'),
     ('close', u'平仓'),
-    ('closelimit', u'限价平仓'),
+    # ('closelimit', u'限价平仓'),
     ('cancel', u'取消'),
     ('setstop', u'设置止损'),
     ('setprofit', u'设置止盈')
@@ -220,7 +227,9 @@ class ModelStrategyExecuter(models.Model):
     # 最大做空头寸数量(maxSellPosition)
     maxSellPosition = models.IntegerField(u'最大做多头寸数量', default=1)
     # 交易接口类型(traderType)
-    traderType = models.CharField(u'数据源', max_length=30, choices=TRADER_TYPE)
+    # traderType = models.CharField(u'交易接口类型', max_length=30, choices=TRADER_TYPE)
+    # 交易接口类型(traderClass)
+    traderClass = models.CharField(u'交易接口类型', max_length=30, choices=TRADER_CLASS)
 
     class Meta:
         verbose_name = u'策略执行器'
@@ -233,9 +242,11 @@ class ModelPosition(models.Model):
     '''
     # 头寸标识(positionId) TODO 可否直接使用Position的id
     # 策略执行器(strategyExecuter)
-    strategyExecuter = models.ForeignKey('ModelStrategyExecuter', verbose_name=u'策略执行器', blank=True, null=True)
+    strategyExecuter = models.ForeignKey('ModelStrategyExecuter', verbose_name=u'策略执行器')
     # 交易接口类型(traderType)
-    traderType = models.CharField(u'数据源', max_length=30, choices=TRADER_TYPE)
+    # traderType = models.CharField(u'交易接口类型', max_length=30, choices=TRADER_TYPE)
+    # 交易接口类型(traderClass)
+    traderClass = models.CharField(u'交易接口类型', max_length=30, choices=TRADER_CLASS)
     # 品种(instrumentId)
     instrumentId = models.CharField(u'品种', max_length=50)
     # 交易方向(tradingDirection)
@@ -243,38 +254,38 @@ class ModelPosition(models.Model):
     # 交易数量(volume)
     volume = models.FloatField(u'交易数量')
     # 开仓时间(openTime)
-    openTime = models.DateTimeField(u'开仓时间')
+    openTime = models.DateTimeField(u'开仓时间', blank=True, null=True)
     # 开仓限价(openLimitPrice)
-    openLimitPrice = models.FloatField(u'开仓限价', blank=True, null=True)
+    openLimitPrice = models.FloatField(u'开仓限价', default=0)
     # 开仓价格(openPrice)
     openPrice = models.FloatField(u'开仓价格', blank=True, null=True)
     # 平仓时间(closeTime)
     closeTime = models.DateTimeField(u'平仓时间', blank=True, null=True)
     # 平仓限价(closeLimitPrice)
-    closeLimitPrice = models.FloatField(u'平仓限价', blank=True, null=True)
+    closeLimitPrice = models.FloatField(u'平仓限价', default=0)
     # 平仓价格(closePrice)
     closePrice = models.FloatField(u'平仓价格', blank=True, null=True)
     # 止损价(stopPrice)
-    stopPrice = models.FloatField(u'止损价', blank=True, null=True)
+    stopPrice = models.FloatField(u'止损价', default=0)
     # 止盈价(profitPrice)
-    profitPrice = models.FloatField(u'止盈价', blank=True, null=True)
+    profitPrice = models.FloatField(u'止盈价', default=0)
     # 状态(state)
     state = models.CharField(u'状态', max_length=30, choices=POSITION_STATE)
     # 记录创建时间(createTime)
-    createTime = models.DateTimeField(u'记录创建时间')
+    createTime = models.DateTimeField(u'记录创建时间', default=datetime.now)
     # 记录修改时间
-    modifyTime = models.DateTimeField(u'记录修改时间')
+    modifyTime = models.DateTimeField(u'记录修改时间', default=datetime.now)
 
     def __unicode__(self):
         return '%d,%s,%.1f,%s' % (self.id, self.directionCode, self.volume, self.state)
 
-    def profit(self):
-        if self.state != 'close':
-            return 0
-        if self.direction == 'buy':
-            return self.closePrice - self.openPrice
-        if self.direction == 'sell':
-            return self.openPrice - self.closePrice
+    # def profit(self):
+    #     if self.state != 'close':
+    #         return 0
+    #     if self.direction == 'buy':
+    #         return self.closePrice - self.openPrice
+    #     if self.direction == 'sell':
+    #         return self.openPrice - self.closePrice
 
     class Meta:
         verbose_name = u'交易记录'
@@ -287,13 +298,17 @@ class ModelOrder(models.Model):
     报单记录
     '''
     # 策略执行器(strategyExecuter)
-    strategyExecuter = models.ForeignKey('ModelStrategyExecuter', verbose_name=u'策略执行器', blank=True, null=True)
-    # 头寸(Position)
-    position = models.ForeignKey('ModelPosition', verbose_name=u'头寸', blank=True, null=True)
-    # 是否模拟交易(simulate)
-    simulate = models.BooleanField(u'是否模拟交易', default=True)
-    # 报单编号(orderRef)
-    orderRef = models.CharField(u'报单编号', max_length=50, blank=True, null=True)
+    strategyExecuter = models.ForeignKey('ModelStrategyExecuter', verbose_name=u'策略执行器')
+    # 交易接口类型(traderType)
+    # traderType = models.CharField(u'交易接口类型', max_length=30, choices=TRADER_TYPE)
+    # 交易接口类型(traderClass)
+    traderClass = models.CharField(u'交易接口类型', max_length=30, choices=TRADER_CLASS)
+    # 影响头寸(Position)
+    position = models.ForeignKey('ModelPosition', verbose_name=u'影响头寸', blank=True, null=True)
+    # 影响报单(Order)
+    order = models.ForeignKey('ModelOrder', verbose_name=u'影响报单', blank=True, null=True)
+    # 报单编号(orderRef) 报单编号应该直接使用id
+    # orderRef = models.CharField(u'报单编号', max_length=50, blank=True, null=True)
     # 品种(instrumentId)
     instrumentId = models.CharField(u'品种', max_length=50)
     # 报单类型(ation)
@@ -303,31 +318,31 @@ class ModelOrder(models.Model):
     # 交易数量(volume)
     volume = models.FloatField(u'交易数量')
     # 开仓限价(openLimitPrice)
-    openLimitPrice = models.FloatField(u'开仓限价', blank=True, null=True)
+    openLimitPrice = models.FloatField(u'开仓限价', default=0)
     # 开仓价格(openPrice)
     openPrice = models.FloatField(u'开仓价格', blank=True, null=True)
     # 平仓限价(closeLimitPrice)
-    closeLimitPrice = models.FloatField(u'平仓限价', blank=True, null=True)
+    closeLimitPrice = models.FloatField(u'平仓限价', default=0)
     # 平仓价格(closePrice)
     closePrice = models.FloatField(u'平仓价格', blank=True, null=True)
     # 止损价(stopPrice)
-    stopPrice = models.FloatField(u'止损价', blank=True, null=True)
+    stopPrice = models.FloatField(u'止损价', defualt=0)
     # 止盈价(profitPrice)
-    profitPrice = models.FloatField(u'止盈价', blank=True, null=True)
-    # 报单时间(insertTime)
-    insertTime = models.DateField(u'报单时间', default=datetime.now)
+    profitPrice = models.FloatField(u'止盈价', default=0)
+    # 报单时间(insertTime) 和createTime重复,直接使用createTime应该就可以了
+    # insertTime = models.DateField(u'报单时间', default=datetime.now)
     # 完成时间(finishTime)
     finishTime = models.DateField(u'完成时间', blank=True, null=True)
     # 报单状态(state)
     state = models.CharField(u'报单状态', max_length=50, choices=ORDER_STATE)
     # 出错代码(lastErrorId)
-    errorId = models.IntegerField('出错代码')
+    errorId = models.IntegerField('出错代码', blank=True, null=True)
     # 出错信息(lastErrorMsg)
-    errorMsg = models.CharField(u'出错信息', max_length=500)
+    errorMsg = models.CharField(u'出错信息', max_length=500, blank=True, null=True)
     # 记录创建时间(createTime)
-    createTime = models.DateTimeField(u'记录创建时间')
+    createTime = models.DateTimeField(u'记录创建时间', default=datetime.now)
     # 记录修改时间
-    modifyTime = models.DateTimeField(u'记录修改时间')
+    modifyTime = models.DateTimeField(u'记录修改时间', default=datetime.now)
 
     class Meta:
         verbose_name = u'报单记录'
