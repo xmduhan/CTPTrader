@@ -14,5 +14,6 @@ def test_open_position():
     """
     测试非限价方式打开头寸
     """
-    #trader = Trader()
-    pass
+    trader = Trader()
+
+

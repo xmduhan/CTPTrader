@@ -34,6 +34,7 @@ POSITION_STATE = (
     ('open', u'开仓'),
     ('preclose', u'预平仓'),
     ('close', u'平仓'),
+    ('error', u'出错'),
     ('cancel', u'取消')
 )
 
