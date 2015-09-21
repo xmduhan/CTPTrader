@@ -172,6 +172,8 @@ class ModelDataGenerator(models.Model):
     '''
     数据生成器配置
     '''
+    # 代码(code)
+    code = models.CharField(u'代码', max_length=50)
     # 名称(name)
     name = models.CharField(u'名称', max_length=100)
     # 账号(account)
@@ -206,6 +208,8 @@ class ModelStrategyExecuter(models.Model):
     '''
     策略执行器
     '''
+    # 代码(code)
+    code = models.CharField(u'代码', max_length=50)
     # 名称(name)
     name = models.CharField(u'名称', max_length=100)
     # 账号(account)
@@ -242,7 +246,7 @@ class ModelPosition(models.Model):
     '''
     # 头寸标识(positionId) TODO 可否直接使用Position的id
     # 策略执行器(strategyExecuter)
-    strategyExecuter = models.ForeignKey('ModelStrategyExecuter', verbose_name=u'策略执行器')
+    strategyExecuter = models.ForeignKey('ModelStrategyExecuter', verbose_name=u'策略执行器', blank=True, null=True)
     # 交易接口类型(traderType)
     # traderType = models.CharField(u'交易接口类型', max_length=30, choices=TRADER_TYPE)
     # 交易接口类型(traderClass)
@@ -298,7 +302,7 @@ class ModelOrder(models.Model):
     报单记录
     '''
     # 策略执行器(strategyExecuter)
-    strategyExecuter = models.ForeignKey('ModelStrategyExecuter', verbose_name=u'策略执行器')
+    strategyExecuter = models.ForeignKey('ModelStrategyExecuter', verbose_name=u'策略执行器', blank=True, null=True)
     # 交易接口类型(traderType)
     # traderType = models.CharField(u'交易接口类型', max_length=30, choices=TRADER_TYPE)
     # 交易接口类型(traderClass)
@@ -326,7 +330,7 @@ class ModelOrder(models.Model):
     # 平仓价格(closePrice)
     closePrice = models.FloatField(u'平仓价格', blank=True, null=True)
     # 止损价(stopPrice)
-    stopPrice = models.FloatField(u'止损价', defualt=0)
+    stopPrice = models.FloatField(u'止损价', default=0)
     # 止盈价(profitPrice)
     profitPrice = models.FloatField(u'止盈价', default=0)
     # 报单时间(insertTime) 和createTime重复,直接使用createTime应该就可以了
@@ -347,4 +351,4 @@ class ModelOrder(models.Model):
     class Meta:
         verbose_name = u'报单记录'
         verbose_name_plural = u'[08].报单记录'
-        ordering = ['insertTime', 'finishTime']
+        ordering = ['finishTime']

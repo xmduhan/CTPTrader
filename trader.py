@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-from database.models import ModelPosition,ModelOrder
+from database.models import ModelPosition, ModelOrder
 
 
 class Trader(object):
@@ -21,11 +21,12 @@ class Trader(object):
     3. 子类甚至可以不需要重载回调方法,除非子类有特殊的数据存储需要
     """
 
-    def __init__(self, strategyExecuter):
+    def __init__(self, modelStrategyExecuter=None):
         """
         相关的初始化操作
+        modelStrategyExecuter
         """
-        self.strategyExecuter = strategyExecuter
+        self.modelStrategyExecuter = modelStrategyExecuter
 
     def openPosition(self, instrumentId, direction, volume=1, OpenLimitPrice=0, stopPrice=0, profitPrice=0):
         """
@@ -41,7 +42,7 @@ class Trader(object):
             orderId 开仓报单单号
         """
         data = {
-            'strategyExecuter': self.strategyExecuter,
+            'strategyExecuter': self.modelStrategyExecuter,
             'traderClass': self.__class__.__name__,
             'instrumentId': instrumentId,
             'direction': direction,

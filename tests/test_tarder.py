@@ -1,8 +1,18 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-def test_trader_open_position_with_no_price_limit():
+from trader import Trader
+
+def setup():
+    """
+    测试用例初始化
+    """
+    pass
+
+
+def test_open_position():
     """
     测试非限价方式打开头寸
     """
-    assert False
+    #trader = Trader()
+    pass
