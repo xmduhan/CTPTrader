@@ -281,6 +281,13 @@ class ModelPosition(models.Model):
     # 记录修改时间
     modifyTime = models.DateTimeField(u'记录修改时间', default=datetime.now)
 
+    def save(self):
+        """
+        重载Model的save方法
+        """
+        self.modifyTime = datetime.now()
+        super(ModelPosition, self).save()
+
     def __unicode__(self):
         return '%d,%s,%.1f,%s' % (self.id, self.directionCode, self.volume, self.state)
 
@@ -348,6 +355,13 @@ class ModelOrder(models.Model):
     createTime = models.DateTimeField(u'记录创建时间', default=datetime.now)
     # 记录修改时间
     modifyTime = models.DateTimeField(u'记录修改时间', default=datetime.now)
+
+    def save(self):
+        """
+        重载Model的save方法
+        """
+        self.modifyTime = datetime.now()
+        super(ModelOrder, self).save()
 
     class Meta:
         verbose_name = u'报单记录'

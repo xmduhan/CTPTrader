@@ -4,6 +4,8 @@ import sys
 import django
 import threading
 import uuid
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 
 def getProjectPath():
@@ -26,6 +28,13 @@ def setDjangoEnvironment():
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", settings)
     if version >= 1.7:
         django.setup()
+
+
+def getDefaultInstrumentID(months=1):
+    """
+    获取一个可用的交易品种ID
+    """
+    return datetime.strftime(datetime.now() + relativedelta(months=months), "IF%y%m")
 
 
 class CallbackManager(object):

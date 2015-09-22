@@ -2,6 +2,7 @@
 # encoding: utf-8
 
 from database.models import ModelPosition, ModelOrder
+from datetime import datetime
 
 
 class Trader(object):
@@ -28,14 +29,14 @@ class Trader(object):
         """
         self.modelStrategyExecuter = modelStrategyExecuter
 
-    def openPosition(self, instrumentId, direction, volume=1, OpenLimitPrice=0, stopPrice=0, profitPrice=0):
+    def openPosition(self, instrumentId, direction, volume=1, openLimitPrice=0, stopPrice=0, profitPrice=0):
         """
         开仓操作
         参数:
             instrumentId 要建仓的交易品种标识
             direction 头寸方向,'buy' 做多,'sell' 做空
             volume 交易数量,默认为1手
-            OpenLimitPrice 限价单价格,默认为0,表示不限价
+            openLimitPrice 限价单价格,默认为0,表示不限价
             stopPrice 头寸止损价格,默认为0,表示不设置止损
             profitPrice 头寸止盈价格,默认为0,表示不设置止盈
         返回:
@@ -47,7 +48,7 @@ class Trader(object):
             'instrumentId': instrumentId,
             'direction': direction,
             'volume': volume,
-            'OpenLimitPrice': OpenLimitPrice,
+            'openLimitPrice': openLimitPrice,
             'stopPrice': stopPrice,
             'profitPrice': profitPrice,
         }
@@ -62,6 +63,8 @@ class Trader(object):
         order.position = position
         order.action = 'open'
         order.state = 'insert'
+        order.errorId = 0
+        order.errorMsg = ""
         order.save()
 
         return order
@@ -75,7 +78,12 @@ class Trader(object):
         返回:
             order 平仓报单数据实体
         """
-        pass
+        position = ModelPosition.get(id=positionId, state='open')
+        order = ModelOrder(
+            '':
+
+        )
+
 
     def cancelOrder(self, orderId):
         """
@@ -141,7 +149,14 @@ class Trader(object):
             position 新创建的头寸的数据实体
         返回:无返回
         """
-        pass
+        # 保存order状态
+        order.state = 'finish'
+        order.finishTime = datetime.now()
+        order.save()
+        # 保存position状态
+        position.state = 'open'
+        position.openTime = datetime.now()
+        position.save()
 
     def onPostionClosed(self, order, position):
         """
@@ -193,7 +208,14 @@ class Trader(object):
             position 打开失败的头寸数据实体(即便打开失败，在头寸表中也会有一条记录)
         返回:无返回
         """
-        pass
+        # 保存order状态信息
+        order.state = 'error'
+        order.errorId = errorId
+        order.errorMsg = errorMsg
+        order.save()
+        # 保存position状态信息
+        position.state = 'error'
+        position.save()
 
     def onCloseError(self, order, errorId, errorMsg, position=None):
         """
