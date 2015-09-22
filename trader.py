@@ -77,13 +77,32 @@ class Trader(object):
             closeLimitPrice 平仓限价
         返回:
             order 平仓报单数据实体
+        TODO: closeLimitPrice 要如何处理还没考虑清楚
         """
-        position = ModelPosition.get(id=positionId, state='open')
-        order = ModelOrder(
-            '':
+        # 读取头寸信息
+        position = ModelPosition.objects.get(id=positionId, state='open')
+        position.state = 'preclose'
+        position.closeLimitPrice = closeLimitPrice
+        position.save()
 
-        )
+        # 创建平仓订单
+        order = ModelOrder()
+        order.strategyExecuter = self.modelStrategyExecuter
+        order.traderClass = self.__class__.__name__
+        order.position = position
+        order.instrumentId = position.instrumentId
+        order.action = 'close'
+        order.direction = position.direction
+        order.volume = position.volume
+        order.openLimitPrice = position.openLimitPrice
+        order.openPrice = position.openPrice
+        order.closeLimitPrice = closeLimitPrice
+        order.stopPrice = position.stopPrice
+        order.profitPrice = position.profitPrice
+        order.state = 'insert'
+        order.save()
 
+        return order
 
     def cancelOrder(self, orderId):
         """
@@ -166,7 +185,13 @@ class Trader(object):
             position 被平仓的头寸的数据实体
         返回:无返回
         """
-        pass
+        position.state = 'close'
+        position.closeTime = datetime.now()
+        position.save()
+
+        order.state = 'finish'
+        order.finishTime = datetime.now()
+        order.save()
 
     def onOrderCanceled(self, order, toOrder):
         """
@@ -227,7 +252,16 @@ class Trader(object):
             position 尝试影响的头寸数据实体
         返回:无返回
         """
-        pass
+        # 保存order状态信息
+        order.state = 'error'
+        order.finishTime = datetime.now()
+        order.errorId = errorId
+        order.errorMsg = errorMsg
+        order.save()
+        # 保存头寸状态信息(还原头寸的状态)
+        position.state = 'open'
+        position.closeLimitPrice = 0
+        order.save()
 
     def onSetStopPriceError(self, order, errorId, errorMsg, position=None):
         """
