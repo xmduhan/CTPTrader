@@ -59,7 +59,7 @@ def test_open_position_error():
     # 模拟打开头寸出错的情况
     errorId = -1
     errorMsg = u'测试'
-    trader.onOpenError(order, errorId, errorMsg, position)
+    trader.onOpenPositionError(order, errorId, errorMsg, position)
     assert order.state == 'error'
     assert order.errorId == errorId
     assert order.errorMsg == errorMsg
@@ -119,7 +119,7 @@ def test_close_position_error():
     # 模拟头寸创建失败事件
     errorId = -1
     errorMsg = u'测试'
-    trader.onCloseError(closeOrder, errorId, errorMsg, position)
+    trader.onClosePositionError(closeOrder, errorId, errorMsg, position)
     assert closeOrder.state == 'error'
     assert closeOrder.finishTime is not None
     assert closeOrder.errorId == errorId

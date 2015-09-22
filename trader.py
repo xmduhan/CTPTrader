@@ -223,7 +223,7 @@ class Trader(object):
         """
         pass
 
-    def onOpenError(self, order, errorId, errorMsg, position):
+    def onOpenPositionError(self, order, errorId, errorMsg, position):
         """
         头寸打开出错事件
         参数:
@@ -242,7 +242,7 @@ class Trader(object):
         position.state = 'error'
         position.save()
 
-    def onCloseError(self, order, errorId, errorMsg, position=None):
+    def onClosePositionError(self, order, errorId, errorMsg, position=None):
         """
         头寸平仓出错事件
         参数:
