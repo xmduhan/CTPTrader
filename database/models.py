@@ -289,7 +289,7 @@ class ModelPosition(models.Model):
         super(ModelPosition, self).save()
 
     def __unicode__(self):
-        return '%d,%s,%.1f,%s' % (self.id, self.directionCode, self.volume, self.state)
+        return '%d,%s,%.1f,%s' % (self.id, self.direction, self.volume, self.state)
 
     # def profit(self):
     #     if self.state != 'close':

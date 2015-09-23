@@ -17,7 +17,13 @@ def test_open_position():
     """
     测试打开头寸
     """
+    flag = []
+
+    def onPositionOpened(order, position):
+        flag.append([order, position])
+
     trader = Trader()
+    trader.bind('onPositionOpened', onPositionOpened)
 
     # 尝试进行打开头寸报单
     order = trader.openPosition(getDefaultInstrumentID(), 'buy', 1)
@@ -46,12 +52,23 @@ def test_open_position():
     assert position.openPrice is None
     assert order.openPrice is None
 
+    # 检查绑定事件正常传递
+    assert len(flag) == 1
+    assert flag[0][0] == order
+    assert flag[0][1] == position
+
 
 def test_open_position_error():
     """
     测试打开头寸出错的情况
     """
+    flag = []
+
+    def onOpenPositionError(order, errorId, errorMsg, position):
+        flag.append([order, errorId, errorMsg, position])
+
     trader = Trader()
+    trader.bind('onOpenPositionError', onOpenPositionError)
     # 尝试打开头寸的报单
     order = trader.openPosition(getDefaultInstrumentID(), 'buy', 1)
     position = order.position
@@ -65,12 +82,25 @@ def test_open_position_error():
     assert order.errorMsg == errorMsg
     assert position.state == 'error'
 
+    # 检查事件正常传递
+    assert len(flag) == 1
+    assert flag[0][0] == order
+    assert flag[0][1] == errorId
+    assert flag[0][2] == errorMsg
+    assert flag[0][3] == position
+
 
 def test_close_position():
     """
     测试关闭头寸
     """
+    flag = []
+
+    def onPostionClosed(order, position):
+        flag.append([order, position])
+
     trader = Trader()
+    trader.bind('onPostionClosed', onPostionClosed)
     # 创建一个头寸供关闭使用
     openOrder = trader.openPosition(getDefaultInstrumentID(), 'buy', 1)
     position = openOrder.position
@@ -103,12 +133,23 @@ def test_close_position():
     assert position.closePrice is None
     assert closeOrder.closePrice is None
 
+    # 检查事件正常传递
+    assert len(flag) == 1
+    assert flag[0][0] == closeOrder
+    assert flag[0][1] == position
+
 
 def test_close_position_error():
     """
     测试关闭头寸出错的情况
     """
+    flag = []
+
+    def onClosePositionError(order, errorId, errorMsg, position=None):
+        flag.append([order, errorId, errorMsg, position])
+
     trader = Trader()
+    trader.bind('onClosePositionError', onClosePositionError)
     # 创建一个头寸并关闭它
     openOrder = trader.openPosition(getDefaultInstrumentID(), 'buy', 1)
     position = openOrder.position
@@ -127,5 +168,9 @@ def test_close_position_error():
     assert position.state == 'open'
     assert position.closeTime is None
 
-
-
+    # 检查事件正常传递
+    assert len(flag) == 1
+    assert flag[0][0] == closeOrder
+    assert flag[0][1] == errorId
+    assert flag[0][2] == errorMsg
+    assert flag[0][3] == position

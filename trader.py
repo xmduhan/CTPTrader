@@ -3,6 +3,7 @@
 
 from database.models import ModelPosition, ModelOrder
 from datetime import datetime
+from comhelper import CallbackManager
 
 
 class Trader(object):
@@ -26,8 +27,24 @@ class Trader(object):
         """
         相关的初始化操作
         modelStrategyExecuter
+        NOTE: 这里的参数使用的是执行器的数据实体,但是这似乎是有问题,如果获取交易数据流,需要进一步考虑
         """
         self.modelStrategyExecuter = modelStrategyExecuter
+        self.__callbackManager = CallbackManager()
+
+    def getClass(self):
+        """
+        获得当前交易接口的类名
+        """
+        return self.__class__.__name__
+
+    def bind(self, callbackName, funcToCall):
+        """转调回调链管理器"""
+        return self.__callbackManager.bind(callbackName, funcToCall)
+
+    def unbind(self, bindId):
+        """转调回调管理器"""
+        return self.__callbackManager.unbind(bindId)
 
     def openPosition(self, instrumentId, direction, volume=1, openLimitPrice=0, stopPrice=0, profitPrice=0):
         """
@@ -44,7 +61,7 @@ class Trader(object):
         """
         data = {
             'strategyExecuter': self.modelStrategyExecuter,
-            'traderClass': self.__class__.__name__,
+            'traderClass': self.getClass(),
             'instrumentId': instrumentId,
             'direction': direction,
             'volume': volume,
@@ -88,7 +105,7 @@ class Trader(object):
         # 创建平仓订单
         order = ModelOrder()
         order.strategyExecuter = self.modelStrategyExecuter
-        order.traderClass = self.__class__.__name__
+        order.traderClass = self.getClass()
         order.position = position
         order.instrumentId = position.instrumentId
         order.action = 'close'
@@ -125,12 +142,12 @@ class Trader(object):
         """
         pass
 
-    def setProfitPrice(self, positionId, ProfitPrice):
+    def setProfitPrice(self, positionId, profitPrice):
         """
         设置头寸的止盈线
         参数:
             positionId 对应头寸的标识
-            ProfitPrice 止盈价格
+            profitPrice 止盈价格
         返回:
             order 止损修改单数据实体
         """
@@ -177,6 +194,10 @@ class Trader(object):
         position.openTime = datetime.now()
         position.save()
 
+        # 将事件传入绑定函数
+        parameters = {'order': order, 'position': position}
+        self.__callbackManager.callback('onPositionOpened', parameters)
+
     def onPostionClosed(self, order, position):
         """
         头寸平仓事件
@@ -192,6 +213,10 @@ class Trader(object):
         order.state = 'finish'
         order.finishTime = datetime.now()
         order.save()
+
+        # 将事件传入绑定函数
+        parameters = {'order': order, 'position': position}
+        self.__callbackManager.callback('onPositionClosed', parameters)
 
     def onOrderCanceled(self, order, toOrder):
         """
