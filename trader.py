@@ -198,7 +198,7 @@ class Trader(object):
         parameters = {'order': order, 'position': position}
         self.__callbackManager.callback('onPositionOpened', parameters)
 
-    def onPostionClosed(self, order, position):
+    def onPositionClosed(self, order, position):
         """
         头寸平仓事件
         参数:
@@ -267,6 +267,15 @@ class Trader(object):
         position.state = 'error'
         position.save()
 
+        # 将事件传入绑定函数
+        parameters = {
+            'order': order,
+            'errorId': errorId,
+            'errorMsg': errorMsg,
+            'position': position
+        }
+        self.__callbackManager.callback('onOpenPositionError', parameters)
+
     def onClosePositionError(self, order, errorId, errorMsg, position=None):
         """
         头寸平仓出错事件
@@ -287,6 +296,15 @@ class Trader(object):
         position.state = 'open'
         position.closeLimitPrice = 0
         order.save()
+
+        # 将事件传入绑定函数
+        parameters = {
+            'order': order,
+            'errorId': errorId,
+            'errorMsg': errorMsg,
+            'position': position
+        }
+        self.__callbackManager.callback('onClosePositionError', parameters)
 
     def onSetStopPriceError(self, order, errorId, errorMsg, position=None):
         """

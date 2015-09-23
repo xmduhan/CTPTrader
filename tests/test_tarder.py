@@ -96,11 +96,11 @@ def test_close_position():
     """
     flag = []
 
-    def onPostionClosed(order, position):
+    def onPositionClosed(order, position):
         flag.append([order, position])
 
     trader = Trader()
-    trader.bind('onPostionClosed', onPostionClosed)
+    trader.bind('onPositionClosed', onPositionClosed)
     # 创建一个头寸供关闭使用
     openOrder = trader.openPosition(getDefaultInstrumentID(), 'buy', 1)
     position = openOrder.position
@@ -123,7 +123,7 @@ def test_close_position():
     assert position.closeLimitPrice == 0
 
     # 模拟头寸正常关闭事件
-    trader.onPostionClosed(closeOrder, position)
+    trader.onPositionClosed(closeOrder, position)
     assert closeOrder.state == 'finish'
     assert closeOrder.finishTime is not None
     assert position.state == 'close'
