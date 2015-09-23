@@ -136,9 +136,9 @@ class Trader(object):
         """
         pass
 
-    def listPosition(self, state='open', **kwargs):
+    def getPositionList(self, **kwargs):
         """
-        NOTE: 这里的state默认参数似乎完全没有必要
+        NOTE: 这里的state默认参数似乎完全没有必要,暂时先去掉
         头寸查询
         参数:
             state 头寸状态,默认为'open',默认仅查询目前处于打开状态的头寸
@@ -148,9 +148,9 @@ class Trader(object):
         """
         pass
 
-    def listOrder(self, state='insert', **kwargs):
+    def getOrderList(self, **kwargs):
         """
-        NOTE: 这里的state默认参数似乎完全没有必要
+        NOTE: 这里的state默认参数似乎完全没有必要,暂时先去掉
         挂单查询
         参数:
             state 报单状态,默认为'insert',默认仅查询哪些处理中的报单
