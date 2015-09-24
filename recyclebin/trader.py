@@ -369,7 +369,7 @@ class Trader(object):
         如果失败返回:[关闭失败的数量,[关闭成功的头寸对应的ModelPosition对象],[失败的头寸对应的ModelPosition对象]]
         '''
         # 设置查询条件
-        querySet = self.getPostionQuerySet()
+        querySet = self.getPositionQuerySet()
         querySet = querySet.filter(state='open')
         if instrumentIDList :
             querySet = querySet.filter(instrumentID__in=instrumentIDList)
@@ -404,7 +404,7 @@ class Trader(object):
         获取头寸手数
         '''
         # 设置查询条件
-        querySet = self.getPostionQuerySet()
+        querySet = self.getPositionQuerySet()
         querySet = querySet.filter(state__in=['open'])
         if instrumentIDList :
             querySet = querySet.filter(instrumentID__in=instrumentIDList)
@@ -420,7 +420,7 @@ class Trader(object):
         return volume
 
 
-    def getPostionQuerySet(self,**kwargs):
+    def getPositionQuerySet(self,**kwargs):
         '''
         获取头寸数据集
         主要是封装task,strategyExecuter的过滤操作
@@ -438,7 +438,7 @@ class Trader(object):
         查看头寸
         '''
         # 设置查询条件
-        querySet = self.getPostionQuerySet()
+        querySet = self.getPositionQuerySet()
         if state:
             querySet = querySet.filter(state=state)
 

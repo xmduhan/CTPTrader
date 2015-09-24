@@ -108,7 +108,7 @@ def test_close_position():
     assert position.state == 'open'
 
     # 测试头寸关闭操作
-    closeOrder = trader.closePostion(position.id)
+    closeOrder = trader.closePosition(position.id)
     assert isinstance(closeOrder, ModelOrder)
     assert closeOrder.id is not None
     assert closeOrder.position == position
@@ -155,7 +155,7 @@ def test_close_position_error():
     position = openOrder.position
     trader.onPositionOpened(openOrder, position)
     assert position.state == 'open'
-    closeOrder = trader.closePostion(position.id)
+    closeOrder = trader.closePosition(position.id)
     position = ModelPosition.objects.get(id=position.id)
     # 模拟头寸创建失败事件
     errorId = -1

@@ -86,7 +86,7 @@ class Trader(object):
 
         return order
 
-    def closePostion(self, positionId, closeLimitPrice=0):
+    def closePosition(self, positionId, closeLimitPrice=0):
         """
         平仓操作
         参数:

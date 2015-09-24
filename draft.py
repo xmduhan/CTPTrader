@@ -10,7 +10,7 @@
 1、增加策略目录并开发1个简单测试策略（ok）
 1、数据生成器进程基本代码(ok)
 1、关于instrumentID 和 instrumentID 的冲突问题(ok)
-1、tradingRecord需要改成Postion并增加，增加一个Order实体对象。(ok)
+1、tradingRecord需要改成Position并增加，增加一个Order实体对象。(ok)
 1、修改数据模型设计，去掉Task简化设计(ok)
 1、执行器不应该记录的是广播地址，而应该是对应的数据生成器对象(ok)
 
