@@ -132,7 +132,23 @@ class Trader(object):
         返回:
             cancelOrder 取消单数据实体
         """
-        pass
+        toOrder = ModelOrder.objects.get(id=orderId)
+        order = ModelOrder()
+        order.strategyExecuter = self.modelStrategyExecuter
+        order.traderClass = self.getClass()
+        order.position = toOrder.position
+        order.order = toOrder
+        order.instrumentId = toOrder.instrumentId
+        order.action = 'cancel'
+        order.direction = toOrder.direction
+        order.volume = toOrder.volume
+        order.openLimitPrice = toOrder.openLimitPrice
+        order.stopPrice = toOrder.stopPrice
+        order.profitPrice = toOrder.profitPrice
+        order.state = 'insert'
+        order.save()
+
+        return order
 
     def setStopPrice(self, positionId, stopPrice):
         """
@@ -174,7 +190,27 @@ class Trader(object):
         返回:
             order 止损修改单数据实体
         """
-        pass
+        position = ModelPosition.objects.get(id=positionId, state='open')
+
+        # 创建修改止损订单
+        order = ModelOrder()
+        order.strategyExecuter = self.modelStrategyExecuter
+        order.traderClass = self.getClass()
+        order.position = position
+        order.instrumentId = position.instrumentId
+        order.action = 'setprofit'
+        order.direction = position.direction
+        order.volume = position.volume
+        order.openLimitPrice = position.openLimitPrice
+        order.openPrice = position.openPrice
+        order.closeLimitPrice = position.closeLimitPrice
+        order.stopPrice = position.stopPrice
+        order.profitPrice = position.profitPrice
+        order.profitPrice = profitPrice
+        order.state = 'insert'
+        order.save()
+
+        return order
 
     def getPositionList(self, **kwargs):
         """
@@ -249,7 +285,20 @@ class Trader(object):
             toOrder 被取消的挂单的数据实体
         返回:无返回
         """
-        pass
+        # 设置取消单的状态
+        order.state = 'finish'
+        order.finishTime = datetime.now()
+        order.save()
+
+        # 设置报单状态
+        toOrder.state = 'cancel'
+        toOrder.finishTime = datetime.now()
+        toOrder.save()
+
+        # 设置头寸状态
+        position = toOrder.position
+        position.state = 'cancel'
+        position.save()
 
     def onStopPriceSetted(self, order, position):
         """
@@ -276,7 +325,14 @@ class Trader(object):
             position 被操作影响的头寸数据实体
         返回:无返回
         """
-        pass
+        # 设置订单完成状态
+        order.state = 'finish'
+        order.finishTime = datetime.now()
+        order.save()
+
+        # 设置头寸的的止损
+        position.profitPrice = order.profitPrice
+        position.save()
 
     def onOpenPositionError(self, order, errorId, errorMsg, position):
         """
@@ -346,7 +402,11 @@ class Trader(object):
             position 尝试影响的头寸数据实体
         返回:无返回
         """
-        pass
+        order.errorId = errorId
+        order.errorMsg = errorMsg
+        order.state = 'error'
+        order.finishTime = datetime.now()
+        order.save()
 
     def onSetProfitPriceError(self, order, errorId, errorMsg, position=None):
         """
@@ -358,7 +418,11 @@ class Trader(object):
             position 尝试影响的头寸数据实体
         返回:无返回
         """
-        pass
+        order.errorId = errorId
+        order.errorMsg = errorMsg
+        order.state = 'error'
+        order.finishTime = datetime.now()
+        order.save()
 
     def onCancelOrderError(self, order, errorId, errorMsg, toOrder=None):
         """
@@ -370,4 +434,8 @@ class Trader(object):
             toOrder 尝试影响的挂单的数据实体
         返回:无返回
         """
-        pass
+        order.errorId = errorId
+        order.errorMsg = errorMsg
+        order.state = 'error'
+        order.finishTime = datetime.now()
+        order.save()

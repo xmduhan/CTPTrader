@@ -286,4 +286,142 @@ def test_set_stop_and_profit_price_fail():
     """
     测试设置止损价格和止盈价格但失败
     """
-    pass
+    stopPrice0 = 1000
+    stopPrice1 = stopPrice0 + 10
+    profitPrice0 = 2000
+    profitPrice1 = profitPrice0 - 10
+
+    trader = Trader()
+
+    # 打开头寸
+    order0 = trader.openPosition(
+        instrumentId=getDefaultInstrumentID(),
+        direction='buy',
+        volume=1,
+        stopPrice=stopPrice0,
+        profitPrice=profitPrice0
+    )
+    position = order0.position
+    assert order0.stopPrice == stopPrice0
+    assert order0.profitPrice == profitPrice0
+    assert position.stopPrice == stopPrice0
+    assert position.profitPrice == profitPrice0
+
+    # 打开头寸成功
+    trader.onPositionOpened(order0, position)
+
+    # 设置止损
+    order1 = trader.setStopPrice(position.id, stopPrice=stopPrice1)
+    position = ModelPosition.objects.get(id=position.id)
+    assert order1 != order0
+    assert order1.position == position
+    assert order1.action == 'setstop'
+    assert order1.state == 'insert'
+    assert order1.finishTime is None
+    assert order1.stopPrice == stopPrice1
+    assert position.stopPrice == stopPrice0   # 修改成功前应保持旧值
+
+    # 设置止损失败
+    errorId = -1
+    errorMsg = u'测试'
+    trader.onSetStopPriceError(order1, errorId, errorMsg, position)
+    order1 = ModelOrder.objects.get(id=order1.id)
+    position = ModelPosition.objects.get(id=position.id)
+    assert order1.state == 'error'
+    assert order1.errorId == errorId
+    assert order1.errorMsg == errorMsg
+    assert order1.finishTime is not None
+    assert position.stopPrice == stopPrice0  # 修改成功后为新值
+
+    # 设置止盈
+    order2 = trader.setProfitPrice(position.id, profitPrice=profitPrice1)
+    position = ModelPosition.objects.get(id=position.id)
+    assert order2.position == position
+    assert order2.action == 'setprofit'
+    assert order2.state == 'insert'
+    assert order2.finishTime is None
+    assert order2.profitPrice == profitPrice1
+    assert position.profitPrice == profitPrice0
+
+    # 设置止盈失败
+    errorId = -1
+    errorMsg = u'测试'
+    trader.onSetProfitPriceError(order2, errorId, errorMsg, position)
+    order2 = ModelOrder.objects.get(id=order2.id)
+    position = ModelPosition.objects.get(id=position.id)
+    assert order2.state == 'error'
+    assert order2.errorId == errorId
+    assert order2.errorMsg == errorMsg
+    assert order2.finishTime is not None
+    assert position.profitPrice == profitPrice0
+
+
+def test_cancel_order_success():
+    """
+    测试取消报单并成功
+    """
+    openLimitPrice = 1000
+    trader = Trader()
+
+    # 尝试创建头寸
+    toOrder = trader.openPosition(
+        instrumentId=getDefaultInstrumentID(),
+        direction='buy',
+        volume=1,
+        openLimitPrice=openLimitPrice
+    )
+
+    # 发起撤单请求
+    order = trader.cancelOrder(toOrder.id)
+    assert order.order == toOrder
+    assert order.action == 'cancel'
+    assert order.state == 'insert'
+    assert order.finishTime is None
+
+    # 发起撤单成功
+    trader.onOrderCanceled(order, toOrder)
+    toOrder = ModelOrder.objects.get(id=toOrder.id)
+    order = ModelOrder.objects.get(id=order.id)
+    position = toOrder.position
+    assert order.state == 'finish'
+    assert order.finishTime is not None
+    assert toOrder.state == 'cancel'
+    assert toOrder.finishTime is not None
+    assert position.state == 'cancel'
+
+
+def test_cancel_order_fail():
+    """
+    测试取消报单但失败
+    """
+    openLimitPrice = 1000
+    trader = Trader()
+
+    # 尝试创建头寸
+    toOrder = trader.openPosition(
+        instrumentId=getDefaultInstrumentID(),
+        direction='buy',
+        volume=1,
+        openLimitPrice=openLimitPrice
+    )
+
+    # 发起撤单请求
+    order = trader.cancelOrder(toOrder.id)
+    assert order.order == toOrder
+    assert order.action == 'cancel'
+    assert order.state == 'insert'
+    assert order.finishTime is None
+
+    # 发起撤单失败
+    errorId = -1
+    errorMsg = u'测试'
+    trader.onCancelOrderError(order, errorId, errorMsg, toOrder)
+    toOrder = ModelOrder.objects.get(id=toOrder.id)
+    order = ModelOrder.objects.get(id=order.id)
+    position = toOrder.position
+    assert order.state == 'error'
+    assert order.finishTime is not None
+    assert order.errorId == errorId
+    assert order.errorMsg == errorMsg
+    assert toOrder.state in ('insert', 'finish')
+    assert position.state in ('preopen', 'open')
