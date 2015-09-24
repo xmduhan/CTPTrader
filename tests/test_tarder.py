@@ -174,3 +174,45 @@ def test_close_position_error():
     assert flag[0][1] == errorId
     assert flag[0][2] == errorMsg
     assert flag[0][3] == position
+
+
+def test_open_and_close_position_with_limit_price():
+    """
+    测试使用限价打开和关闭头寸
+    """
+    openLimitPrice = 1000
+    closeLimitPrice = 2000
+    trader = Trader()
+
+    # 打开头寸
+    order = trader.openPosition(
+        instrumentId=getDefaultInstrumentID(),
+        direction='buy',
+        volume=1,
+        openLimitPrice=openLimitPrice
+    )
+    position = order.position
+    assert order.openLimitPrice == openLimitPrice
+    assert position.openLimitPrice == openLimitPrice
+
+    # 打开头寸成功
+    trader.onPositionOpened(order, position)
+    order = ModelOrder.objects.get(id=order.id)
+    position = ModelPosition.objects.get(id=position.id)
+    assert order.openLimitPrice == openLimitPrice
+    assert position.openLimitPrice == openLimitPrice
+
+    # 关闭头寸
+    order = trader.closePosition(position.id, closeLimitPrice=closeLimitPrice)
+    position = ModelPosition.objects.get(id=position.id)
+    assert order.closeLimitPrice == closeLimitPrice
+    assert position.closeLimitPrice == closeLimitPrice
+
+    # 关闭头寸成功
+    trader.onPositionClosed(order, position)
+    order = ModelOrder.objects.get(id=order.id)
+    position = ModelPosition.objects.get(id=position.id)
+    assert order.closeLimitPrice == closeLimitPrice
+    assert position.closeLimitPrice == closeLimitPrice
+
+
