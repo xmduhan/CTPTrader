@@ -216,3 +216,74 @@ def test_open_and_close_position_with_limit_price():
     assert position.closeLimitPrice == closeLimitPrice
 
 
+def test_set_stop_and_profit_price_success():
+    """
+    测试设置止损价格和止盈价格并成功
+    """
+    stopPrice0 = 1000
+    stopPrice1 = stopPrice0 + 10
+    profitPrice0 = 2000
+    profitPrice1 = profitPrice0 - 10
+
+    trader = Trader()
+
+    # 打开头寸
+    order0 = trader.openPosition(
+        instrumentId=getDefaultInstrumentID(),
+        direction='buy',
+        volume=1,
+        stopPrice=stopPrice0,
+        profitPrice=profitPrice0
+    )
+    position = order0.position
+    assert order0.stopPrice == stopPrice0
+    assert order0.profitPrice == profitPrice0
+    assert position.stopPrice == stopPrice0
+    assert position.profitPrice == profitPrice0
+
+    # 打开头寸成功
+    trader.onPositionOpened(order0, position)
+
+    # 设置止损
+    order1 = trader.setStopPrice(position.id, stopPrice=stopPrice1)
+    position = ModelPosition.objects.get(id=position.id)
+    assert order1 != order0
+    assert order1.position == position
+    assert order1.action == 'setstop'
+    assert order1.state == 'insert'
+    assert order1.finishTime is None
+    assert order1.stopPrice == stopPrice1
+    assert position.stopPrice == stopPrice0   # 修改成功前应保持旧值
+
+    # 设置止损成功
+    trader.onStopPriceSetted(order1, position)
+    order1 = ModelOrder.objects.get(id=order1.id)
+    position = ModelPosition.objects.get(id=position.id)
+    assert order1.state == 'finish'
+    assert order1.finishTime is not None
+    assert position.stopPrice == stopPrice1  # 修改成功后为新值
+
+    # 设置止盈
+    order2 = trader.setProfitPrice(position.id, profitPrice=profitPrice1)
+    position = ModelPosition.objects.get(id=position.id)
+    assert order2.position == position
+    assert order2.action == 'setprofit'
+    assert order2.state == 'insert'
+    assert order2.finishTime is None
+    assert order2.profitPrice == profitPrice1
+    assert position.profitPrice == profitPrice0
+
+    # 设置止盈成功
+    trader.onProfitPriceSetted(order2, position)
+    order2 = ModelOrder.objects.get(id=order2.id)
+    position = ModelPosition.objects.get(id=position.id)
+    assert order2.state == 'finish'
+    assert order2.finishTime is not None
+    assert position.profitPrice == profitPrice1
+
+
+def test_set_stop_and_profit_price_fail():
+    """
+    测试设置止损价格和止盈价格但失败
+    """
+    pass

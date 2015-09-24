@@ -143,7 +143,27 @@ class Trader(object):
         返回:
             order 止损修改单数据实体
         """
-        pass
+        position = ModelPosition.objects.get(id=positionId, state='open')
+
+        # 创建修改止损订单
+        order = ModelOrder()
+        order.strategyExecuter = self.modelStrategyExecuter
+        order.traderClass = self.getClass()
+        order.position = position
+        order.instrumentId = position.instrumentId
+        order.action = 'setstop'
+        order.direction = position.direction
+        order.volume = position.volume
+        order.openLimitPrice = position.openLimitPrice
+        order.openPrice = position.openPrice
+        order.closeLimitPrice = position.closeLimitPrice
+        order.stopPrice = position.stopPrice
+        order.profitPrice = position.profitPrice
+        order.stopPrice = stopPrice
+        order.state = 'insert'
+        order.save()
+
+        return order
 
     def setProfitPrice(self, positionId, profitPrice):
         """
@@ -239,7 +259,14 @@ class Trader(object):
             position 被操作影响的头寸数据实体
         返回:无返回
         """
-        pass
+        # 设置订单完成状态
+        order.state = 'finish'
+        order.finishTime = datetime.now()
+        order.save()
+
+        # 设置头寸的的止损
+        position.stopPrice = order.stopPrice
+        position.save()
 
     def onProfitPriceSetted(self, order, position):
         """
