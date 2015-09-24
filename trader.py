@@ -29,6 +29,7 @@ class Trader(object):
         modelStrategyExecuter
         NOTE: 这里的参数使用的是执行器的数据实体,但是这似乎是有问题,如果获取交易数据流,需要进一步考虑
         """
+        self.events = [m for m in dir(self) if callable(getattr(self, m)) and m.startswith('on')]
         self.modelStrategyExecuter = modelStrategyExecuter
         self.__callbackManager = CallbackManager()
 
@@ -40,6 +41,8 @@ class Trader(object):
 
     def bind(self, callbackName, funcToCall):
         """转调回调链管理器"""
+        if callbackName not in self.events:
+            raise Exception('尝试绑带无效事件')
         return self.__callbackManager.bind(callbackName, funcToCall)
 
     def unbind(self, bindId):
