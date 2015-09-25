@@ -4,7 +4,7 @@
 from database.models import ModelPosition, ModelOrder
 from datetime import datetime
 from comhelper import CallbackManager
-
+import threading
 
 class Trader(object):
 
@@ -439,3 +439,80 @@ class Trader(object):
         order.state = 'error'
         order.finishTime = datetime.now()
         order.save()
+
+
+class SimulateTrader(Trader):
+    """
+    模拟交易类接口
+    NOTE: 对象清理的问题需要进一步考虑
+    """
+
+    def __init__(self, modelStrategyExecuter):
+        """
+        初始化处理
+        """
+        # 调用父类构造函数
+        super(SimulateTrader, self).__init__(modelStrategyExecuter)
+        # 创建工作线程
+        self.thread = threading.Thread(target=self.working)
+        self.thread.start()
+
+        # 初始化报单处理列表
+        self.openOrderList = []
+        self.clsoeOrderList = []
+        self.cancelOrderList = []
+        self.setstopOrderList = []
+        self.setprofitOrderList = []
+        self.orderLock = threading.RLock()
+
+    def working(self):
+        """
+        工作线程方法
+        """
+        while True:
+            # 更新报价数据
+            pass
+            # 处理报单数据
+
+    def onDataArrived(self, instrumentId, ask, bid):
+        """
+        品种的最近报价到达
+        """
+        def _openPosition(order, price):
+            # 设置成交报价
+            position = order.position
+            order.openPrice = price
+            position.price = price
+            # 触发成交事件
+            self.onPositionOpened(order, position)
+
+        def _closePosition(order, price):
+            # 设置成交报价
+            position = order.position
+            order.openPrice = price
+            position.price = price
+            # 触发成交事件
+            self.onPositionClosed(order, position)
+
+        for order in self.openOrderList:
+            direction = order.direction
+            limitPrice = order.openLimitPrice
+            price = {'buy': bid, 'sell': ask}[direction]
+            l = {'buy': lambda x: x>=price, 'sell': lambda x: x<=price}[direction]
+            if limitPrice == 0:
+                _openPosition(order, price)
+            else:
+                if l(limitPrice):
+                    _openPosition(order, (price / limitPrice) / 2)
+
+    def openPosition(self, *args, **kwargs):
+        """
+        打开头寸的处理
+        """
+        order = super(SimulateTrader, self).openPosition(*args, **kwargs)
+        self.orderLock.acquire()
+        try:
+            self.openOrderList.append(order)
+        finally:
+            self.orderLock.release()
+        return order
