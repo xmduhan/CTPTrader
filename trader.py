@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-
+from __future__ import division
 from database.models import ModelPosition, ModelOrder
 from datetime import datetime
 from comhelper import CallbackManager
