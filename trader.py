@@ -447,15 +447,12 @@ class SimulateTrader(Trader):
     NOTE: 对象清理的问题需要进一步考虑
     """
 
-    def __init__(self, modelStrategyExecuter):
+    def __init__(self, modelStrategyExecuter=None):
         """
         初始化处理
         """
         # 调用父类构造函数
         super(SimulateTrader, self).__init__(modelStrategyExecuter)
-        # 创建工作线程
-        self.thread = threading.Thread(target=self.working)
-        self.thread.start()
 
         # 初始化报单处理列表
         self.openOrderList = []
@@ -474,18 +471,30 @@ class SimulateTrader(Trader):
             pass
             # 处理报单数据
 
+    def start(self):
+        """
+        启动工作线程
+        """
+        # 创建工作线程
+        self.thread = threading.Thread(target=self.working)
+        self.thread.start()
+
     def processOpenOrder(self, instrumentId, ask, bid):
         """
         处理开仓报单
         """
+        orderFinish = []
+
         def _openPosition(order, price):
             # 设置成交报价
             position = order.position
             order.openPrice = price
-            position.price = price
+            position.openPrice = price
             # 触发成交事件
             self.onPositionOpened(order, position)
+            orderFinish.append(order)
 
+        # 尝试处理所有开仓报单
         for order in self.openOrderList:
             if order.instrumentId == instrumentId:
                 direction = order.direction
@@ -497,6 +506,13 @@ class SimulateTrader(Trader):
                 else:
                     if la(limitPrice):
                         _openPosition(order, (price + limitPrice) / 2)
+        # 处理完成
+        self.orderLock.acquire()
+        try:
+            for order in orderFinish:
+                self.openOrderList.remove(order)
+        finally:
+            self.orderLock.release()
 
     def processCloseOrder(self, instrumentId, ask, bid):
         """
