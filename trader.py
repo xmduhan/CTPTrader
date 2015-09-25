@@ -474,9 +474,9 @@ class SimulateTrader(Trader):
             pass
             # 处理报单数据
 
-    def onDataArrived(self, instrumentId, ask, bid):
+    def processOpenOrder(self, instrumentId, ask, bid):
         """
-        品种的最近报价到达
+        处理开仓报单
         """
         def _openPosition(order, price):
             # 设置成交报价
@@ -486,6 +486,22 @@ class SimulateTrader(Trader):
             # 触发成交事件
             self.onPositionOpened(order, position)
 
+        for order in self.openOrderList:
+            if order.instrumentId == instrumentId:
+                direction = order.direction
+                limitPrice = order.openLimitPrice
+                price = {'buy': bid, 'sell': ask}[direction]
+                la = {'buy': lambda x: x>=price, 'sell': lambda x: x<=price}[direction]
+                if limitPrice == 0:
+                    _openPosition(order, price)
+                else:
+                    if la(limitPrice):
+                        _openPosition(order, (price + limitPrice) / 2)
+
+    def processCloseOrder(self, instrumentId, ask, bid):
+        """
+        平仓订单处理
+        """
         def _closePosition(order, price):
             # 设置成交报价
             position = order.position
@@ -494,16 +510,26 @@ class SimulateTrader(Trader):
             # 触发成交事件
             self.onPositionClosed(order, position)
 
-        for order in self.openOrderList:
-            direction = order.direction
-            limitPrice = order.openLimitPrice
-            price = {'buy': bid, 'sell': ask}[direction]
-            l = {'buy': lambda x: x>=price, 'sell': lambda x: x<=price}[direction]
-            if limitPrice == 0:
-                _openPosition(order, price)
-            else:
-                if l(limitPrice):
-                    _openPosition(order, (price / limitPrice) / 2)
+        for order in self.clsoeOrderList:
+            if order.instrumentId == instrumentId:
+                direction = order.direction
+                limitPrice = order.closelimitPrice
+                price = {'buy': ask, 'sell': bid}[direction]
+                la = {'buy': lambda x: x<=price, 'sell': lambda x: x>=price}[direction]
+                if limitPrice == 0:
+                    _closePosition(order, price)
+                else:
+                    if la(limitPrice):
+                        _closePosition(order, (price + limitPrice) / 2)
+
+    def onDataArrived(self, instrumentId, ask, bid):
+        """
+        品种的最近报价到达
+        """
+        # 处理开仓报单
+        self.processOpenOrder(instrumentId, ask, bid)
+        # 处理平仓报单
+        self.processCloseOrder(instrumentId, ask, bid)
 
     def openPosition(self, *args, **kwargs):
         """
@@ -516,3 +542,16 @@ class SimulateTrader(Trader):
         finally:
             self.orderLock.release()
         return order
+
+    def closePosition(self, *args, **kwargs):
+        """
+        关闭头寸的处理
+        """
+        order = super(SimulateTrader, self).closePosition(*args, **kwargs)
+        self.orderLock.acquire()
+        try:
+            self.closeOrderList.append(order)
+        finally:
+            self.orderLock.release()
+        return order
+
