@@ -6,6 +6,7 @@ from datetime import datetime
 from comhelper import CallbackManager
 import threading
 
+
 class Trader(object):
 
     """
@@ -456,7 +457,7 @@ class SimulateTrader(Trader):
 
         # 初始化报单处理列表
         self.openOrderList = []
-        self.clsoeOrderList = []
+        self.closeOrderList = []
         self.cancelOrderList = []
         self.setstopOrderList = []
         self.setprofitOrderList = []
@@ -518,18 +519,21 @@ class SimulateTrader(Trader):
         """
         平仓订单处理
         """
+        orderFinish = []
+
         def _closePosition(order, price):
             # 设置成交报价
             position = order.position
-            order.openPrice = price
-            position.price = price
+            order.closePrice = price
+            position.closePrice = price
             # 触发成交事件
             self.onPositionClosed(order, position)
+            orderFinish.append(order)
 
-        for order in self.clsoeOrderList:
+        for order in self.closeOrderList:
             if order.instrumentId == instrumentId:
                 direction = order.direction
-                limitPrice = order.closelimitPrice
+                limitPrice = order.closeLimitPrice
                 price = {'buy': ask, 'sell': bid}[direction]
                 la = {'buy': lambda x: x<=price, 'sell': lambda x: x>=price}[direction]
                 if limitPrice == 0:
@@ -537,6 +541,13 @@ class SimulateTrader(Trader):
                 else:
                     if la(limitPrice):
                         _closePosition(order, (price + limitPrice) / 2)
+        # 处理完成
+        self.orderLock.acquire()
+        try:
+            for order in orderFinish:
+                self.closeOrderList.remove(order)
+        finally:
+            self.orderLock.release()
 
     def onDataArrived(self, instrumentId, ask, bid):
         """
