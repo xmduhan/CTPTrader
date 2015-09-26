@@ -483,6 +483,7 @@ class SimulateTrader(Trader):
     def processOpenOrder(self, instrumentId, ask, bid):
         """
         处理开仓报单
+        NOTE: 这里可能和取消订单操作出现资源争用问题
         """
         orderFinish = []
 
@@ -578,6 +579,18 @@ class SimulateTrader(Trader):
         self.orderLock.acquire()
         try:
             self.closeOrderList.append(order)
+        finally:
+            self.orderLock.release()
+        return order
+
+    def cancelOrder(self, *args, **kwargs):
+        """
+        撤单处理
+        """
+        order = super(SimulateTrader, self).cancelOrder(*args, **kwargs)
+        self.orderLock.acquire()
+        try:
+            self.cancelOrderList.append(order)
         finally:
             self.orderLock.release()
         return order

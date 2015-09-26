@@ -146,7 +146,43 @@ def test_cancel_order():
     """
     测试取消挂单
     """
-    pass
+    trader = SimulateTrader()
+    instrumentId = getDefaultInstrumentID()
+
+    # 创建一个挂单供撤单使用
+    order = trader.openPosition(instrumentId, 'buy', openLimitPrice=100)
+    position = order.position
+    assert order.state == 'insert'
+    assert position.state == 'preopen'
+    assert len(trader.openOrderList) == 1
+
+    # 发出一个不会成交的价格
+    trader.onDataArrived(instrumentId, ask=105, bid=110)
+    order = ModelOrder.objects.get(id=order.id)
+    position = ModelPosition.objects.get(id=position.id)
+    assert order.state == 'insert'
+    assert position.state == 'preopen'
+
+    # 发出撤单请求
+    cancelOrder = trader.cancelOrder(order.id)
+    assert len(trader.cancelOrderList) == 1
+    trader.onDataArrived(instrumentId, ask=105, bid=110)
+    order = ModelOrder.objects.get(id=order.id)
+    position = ModelPosition.objects.get(id=position.id)
+    cancelOrder = ModelOrder.objects.get(id=cancelOrder.id)
+    assert len(trader.cancelOrderList) == 0
+    assert len(trader.openOrderList) == 0
+    assert order.state == 'cancel'
+    assert position.state == 'cancel'
+    assert cancelOrder.state == 'finish'
+
+    # 发出一个原本可以成交的价格
+    trader.onDataArrived(instrumentId, ask=90, bid=95)
+    order = ModelOrder.objects.get(id=order.id)
+    position = ModelPosition.objects.get(id=position.id)
+    assert order.state == 'cancel'
+    assert position.state == 'cancel'
+    assert cancelOrder.state == 'finish'
 
 
 def test_set_stop_price():
