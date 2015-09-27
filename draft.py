@@ -13,14 +13,15 @@
 1、tradingRecord需要改成Position并增加，增加一个Order实体对象。(ok)
 1、修改数据模型设计，去掉Task简化设计(ok)
 1、执行器不应该记录的是广播地址，而应该是对应的数据生成器对象(ok)
-
-#%% 待处理
-
 1、绑定时间相关代码
 1、order还是orderId时个大问题
 1、编写测试用例
 
+# ---------------------------------------------
 
+
+1、完成Trader中查询头寸和查询报单的实现
+1、在SimulateTrader不应该重新构造变量xxxOrderList，应该直接中数据取
 
 1、traderType如何表示是个问题,目前('ctp','simulate'),是否直接存储类名称更好
 1、一定需要openlimit和closelimit两种订单类型吗?
@@ -53,6 +54,9 @@ df = read_frame(qs)
 df = df[['InstrumentID', 'AskPrice1','AskVolume1','BidPrice1','BidVolume1','TradingDay','UpdateTime','UpdateMillisec','Volume','Turnover']]
 writer = ExcelWriter('/tmp/output.xls')
 df.to_excel(writer)
+
+#%% 待处理
+
 writer.save()
 #%%
 InstrumentIDList = list(df.groupby('InstrumentID').count().index)

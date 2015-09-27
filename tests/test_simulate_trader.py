@@ -198,9 +198,39 @@ def test_cancel_order():
     assert cancelOrder.errorMsg == errorMsg
 
 
-def test_set_stop_price():
+def test_open_position_with_stop_price():
     """
     测试设置止损
+    """
+    trader = SimulateTrader()
+    instrumentId = getDefaultInstrumentID()
+    stopPrice = 90
+
+    # 创建一个头寸并设置了止损
+    order = trader.openPosition(instrumentId, 'buy', stopPrice=stopPrice)
+    trader.onDataArrived(instrumentId, ask=100, bid=101)
+    position = order.position
+    assert order.state == 'finish'
+    assert position.state == 'open'
+    assert position.stopPrice == stopPrice
+
+    # 发出一个会触发止损的价格
+    trader.onDataArrived(instrumentId, ask=80, bid=85)
+    position = ModelPosition.objects.get(id=position.id)
+    assert position.state == 'close'
+    assert position.closePrice == 85
+
+
+def test_open_position_with_profit_price():
+    """
+    测试打开头寸的时候同时设置止盈信息
+    """
+    pass
+
+
+def test_set_stop_price():
+    """
+    测试设置止盈
     """
     pass
 
