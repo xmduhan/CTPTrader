@@ -213,29 +213,35 @@ class Trader(object):
 
         return order
 
-    def getPositionList(self, **kwargs):
+    def getPositionList(self, update=False, **kwargs):
         """
-        NOTE: 这里的state默认参数似乎完全没有必要,暂时先去掉
         头寸查询
         参数:
-            state 头寸状态,默认为'open',默认仅查询目前处于打开状态的头寸
+            update 是否使用for update加锁选项
             kwargs 查询条件,django model查询参数格式
         返回:
             positionList 符合查询条件的头寸列表(注意是列表不是生成器)
         """
-        pass
+        query = ModelPosition.objects.filter(strategyExecuter=self.modelStrategyExecuter)
+        query = query.filter(**kwargs)
+        if update:
+            query = query.select_for_update()
+        return list(query)
 
-    def getOrderList(self, **kwargs):
+    def getOrderList(self, update=False, **kwargs):
         """
-        NOTE: 这里的state默认参数似乎完全没有必要,暂时先去掉
         挂单查询
         参数:
-            state 报单状态,默认为'insert',默认仅查询哪些处理中的报单
+            update 是否使用for update加锁选项
             kwargs 查询条件,django model查询参数格式
         返回:
             orderList 服务查询条件的挂单列表(注意是列表不是生成器)
         """
-        pass
+        query = ModelOrder.objects.filter(strategyExecuter=self.modelStrategyExecuter)
+        query = query.filter(**kwargs)
+        if update:
+            query = query.select_for_update()
+        return list(query)
 
     def onPositionOpened(self, order, position):
         """

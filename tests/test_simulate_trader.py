@@ -24,9 +24,9 @@ def test_open_position():
 
     # 尝试创建头(buy)寸并塞入模拟数据
     order = trader.openPosition(instrumentId, 'buy', 1)
-    assert len(trader.openOrderList) == 1
+    assert len(trader.getOrderList(action='open', state='insert')) == 1
     trader.onDataArrived(instrumentId, ask, bid)
-    assert len(trader.openOrderList) == 0
+    assert len(trader.getOrderList(action='open', state='insert')) == 0
 
     # 检查头寸是否成功建立
     order = ModelOrder.objects.get(id=order.id)
@@ -37,9 +37,9 @@ def test_open_position():
 
     # 尝试创建头寸(sell)并塞入模拟数据
     order = trader.openPosition(instrumentId, 'sell', 1)
-    assert len(trader.openOrderList) == 1
+    assert len(trader.getOrderList(action='open', state='insert')) == 1
     trader.onDataArrived(instrumentId, ask, bid)
-    assert len(trader.openOrderList) == 0
+    assert len(trader.getOrderList(action='open', state='insert')) == 0
 
     # 检查头寸是否成功建立
     order = ModelOrder.objects.get(id=order.id)
@@ -59,9 +59,9 @@ def test_open_position_with_limit_price():
     # 尝试创建头(buy)寸
     order = trader.openPosition(instrumentId, 'buy', 1, openLimitPrice=100)
     # 放入一个不会成交的数据
-    assert len(trader.openOrderList) == 1
+    assert len(trader.getOrderList(action='open', state='insert')) == 1
     trader.onDataArrived(instrumentId, ask=90, bid=105)
-    assert len(trader.openOrderList) == 1
+    assert len(trader.getOrderList(action='open', state='insert')) == 1
     # 确定并没有成交
     order = ModelOrder.objects.get(id=order.id)
     position = order.position
@@ -97,9 +97,9 @@ def test_close_position():
 
     # 尝试关闭头寸
     order = trader.closePosition(position.id)
-    assert len(trader.closeOrderList) == 1
+    assert len(trader.getOrderList(action='close', state='insert')) == 1
     trader.onDataArrived(instrumentId, ask, bid)
-    assert len(trader.closeOrderList) == 0
+    assert len(trader.getOrderList(action='clsoe', state='insert')) == 0
     order = ModelOrder.objects.get(id=order.id)
     position = ModelPosition.objects.get(id=position.id)
     assert order.state=='finish'
@@ -139,7 +139,6 @@ def test_close_position_with_limit_price():
     position = ModelPosition.objects.get(id=position.id)
     assert order.state == 'finish'
     assert position.state == 'close'
-    print position.closePrice
     assert position.closePrice == (105 + 100) / 2
 
 
@@ -155,7 +154,7 @@ def test_cancel_order():
     position = order.position
     assert order.state == 'insert'
     assert position.state == 'preopen'
-    assert len(trader.openOrderList) == 1
+    assert len(trader.getOrderList(action='open', state='insert')) == 1
 
     # 发出一个不会成交的价格
     trader.onDataArrived(instrumentId, ask=105, bid=110)
@@ -166,13 +165,13 @@ def test_cancel_order():
 
     # 发出撤单请求
     cancelOrder = trader.cancelOrder(order.id)
-    assert len(trader.cancelOrderList) == 1
+    assert len(trader.getOrderList(action='cancel', state='insert')) == 1
     trader.onDataArrived(instrumentId, ask=105, bid=110)
     order = ModelOrder.objects.get(id=order.id)
     position = ModelPosition.objects.get(id=position.id)
     cancelOrder = ModelOrder.objects.get(id=cancelOrder.id)
-    assert len(trader.cancelOrderList) == 0
-    assert len(trader.openOrderList) == 0
+    assert len(trader.getOrderList(action='open', state='insert')) == 0
+    assert len(trader.getOrderList(action='cancel', state='insert')) == 0
     assert order.state == 'cancel'
     assert position.state == 'cancel'
     assert cancelOrder.state == 'finish'
@@ -187,11 +186,11 @@ def test_cancel_order():
 
     # 再次尝试对已完成的单进行撤单
     cancelOrder = trader.cancelOrder(order.id)
-    assert len(trader.cancelOrderList) == 1
+    assert len(trader.getOrderList(action='cancel', state='insert')) == 1
     trader.onDataArrived(instrumentId, ask=105, bid=110)
     order = ModelOrder.objects.get(id=order.id)
     position = ModelPosition.objects.get(id=position.id)
-    assert len(trader.cancelOrderList) == 0
+    assert len(trader.getOrderList(action='cancel', state='insert')) == 0
     assert cancelOrder.state == 'error'
     errorId, errorMsg = error.OrderNoActive
     assert cancelOrder.errorId == errorId
