@@ -5,7 +5,7 @@ from database.models import ModelPosition, ModelOrder
 from datetime import datetime
 from comhelper import CallbackManager
 import threading
-
+import error
 
 class Trader(object):
 
@@ -550,6 +550,24 @@ class SimulateTrader(Trader):
         finally:
             self.orderLock.release()
 
+    def processCancelOrder(self):
+        """
+        取消订单操作
+        """
+        for order in self.cancelOrderList:
+            toOrder = order.order
+            self.orderLock.acquire()
+            try:
+                if self.openOrderList.count(toOrder) != 0:
+                    self.openOrderList.remove(toOrder)
+                    self.onOrderCanceled(order, toOrder)
+                else:
+                    errorId, errorMsg = error.OrderNoActive
+                    self.onCancelOrderError(order, errorId, errorMsg, toOrder)
+                self.cancelOrderList.remove(order)
+            finally:
+                self.orderLock.release()
+
     def onDataArrived(self, instrumentId, ask, bid):
         """
         品种的最近报价到达
@@ -558,6 +576,8 @@ class SimulateTrader(Trader):
         self.processOpenOrder(instrumentId, ask, bid)
         # 处理平仓报单
         self.processCloseOrder(instrumentId, ask, bid)
+        # 处理撤单
+        self.processCancelOrder()
 
     def openPosition(self, *args, **kwargs):
         """

@@ -4,6 +4,7 @@ from __future__ import division
 from trader import SimulateTrader
 from comhelper import getDefaultInstrumentID
 from database.models import ModelOrder, ModelPosition
+import error
 
 
 def setup():
@@ -183,6 +184,18 @@ def test_cancel_order():
     assert order.state == 'cancel'
     assert position.state == 'cancel'
     assert cancelOrder.state == 'finish'
+
+    # 再次尝试对已完成的单进行撤单
+    cancelOrder = trader.cancelOrder(order.id)
+    assert len(trader.cancelOrderList) == 1
+    trader.onDataArrived(instrumentId, ask=105, bid=110)
+    order = ModelOrder.objects.get(id=order.id)
+    position = ModelPosition.objects.get(id=position.id)
+    assert len(trader.cancelOrderList) == 0
+    assert cancelOrder.state == 'error'
+    errorId, errorMsg = error.OrderNoActive
+    assert cancelOrder.errorId == errorId
+    assert cancelOrder.errorMsg == errorMsg
 
 
 def test_set_stop_price():
