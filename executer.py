@@ -5,6 +5,24 @@ from database.models import ModelStrategyExecuter
 from trader import Trader
 
 
+def bind(event):
+    """
+    事件绑定的修饰器
+    使用场景: 在策略文件中使用
+    例子:
+    @bind('onPositionOpened')
+    def onPositionOpened(...):
+        ... ...
+    """
+    def func_maker(fun):
+        if hasattr(fun, 'bindTo'):
+            fun.bindTo.append(event)
+        else:
+            fun.bindTo = [event]
+        return fun
+    return func_maker
+
+
 class StrategyExecuter(object):
     """
     策略执行器
