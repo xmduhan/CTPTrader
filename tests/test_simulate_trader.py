@@ -211,6 +211,7 @@ def test_open_position_with_stop_price():
     # 创建一个头寸并设置了止损
     order = trader.openPosition(instrumentId, 'buy', stopPrice=stopPrice)
     trader.onDataArrived(instrumentId, ask=100, bid=101)
+    order = ModelOrder.objects.get(id=order.id)
     position = order.position
     assert order.state == 'finish'
     assert position.state == 'open'
@@ -220,34 +221,50 @@ def test_open_position_with_stop_price():
     trader.onDataArrived(instrumentId, ask=80, bid=85)
     position = ModelPosition.objects.get(id=position.id)
     assert position.state == 'close'
-    assert position.closePrice == 85
+    assert position.closePrice == 80
 
 
 def test_open_position_with_profit_price():
     """
     测试打开头寸的时候同时设置止盈信息
     """
-    pass
+    trader = SimulateTrader()
+    instrumentId = getDefaultInstrumentID()
+    profitPrice = 110
+    # 创建一个头寸并设置了止盈
+    order = trader.openPosition(instrumentId, 'buy', profitPrice=profitPrice)
+    trader.onDataArrived(instrumentId, ask=100, bid=101)
+    order = ModelOrder.objects.get(id=order.id)
+    position = order.position
+    assert order.state == 'finish'
+    assert position.state == 'open'
+    assert position.profitPrice == profitPrice
+
+    # 发出一个会触发止盈的价格
+    trader.onDataArrived(instrumentId, ask=110, bid=115)
+    position = ModelPosition.objects.get(id=position.id)
+    assert position.state == 'close'
+    assert position.closePrice == 110
 
 
 def test_set_stop_price():
     """
     测试设置止盈
     """
-    pass
+    assert False
 
 
 def test_set_profit_price():
     """
     测试设置止盈
     """
-    pass
+    assert False
 
 
 def test_working_thread_running():
     """
     测试工作线程可以正常运行
     """
-    pass
+    assert False
 
 

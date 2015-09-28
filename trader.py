@@ -2,6 +2,7 @@
 # encoding: utf-8
 from __future__ import division
 from database.models import ModelPosition, ModelOrder
+from django.db.models import Q
 from datetime import datetime
 from comhelper import CallbackManager
 import threading
@@ -543,16 +544,42 @@ class SimulateTrader(Trader):
                 errorId, errorMsg = error.OrderNoActive
                 self.onCancelOrderError(order, errorId, errorMsg, toOrder)
 
-    def processStopPrice(self):
+    def processStopPrice(self, instrumentId, ask, bid):
         """
         处理止损
         """
-        pass
+        openPositionList = self.getPositionList(state='open')
+        for position in openPositionList:
+            direction = position.direction
+            price = {'buy': ask, 'sell': bid}[direction]
+            la = {'buy': lambda x: price<=x, 'sell': lambda x: price>=x}[direction]
+            if position.stopPrice != 0:
+                if la(position.stopPrice):
+                    self.closePosition(position.id)
+
+    def processProfitPrice(self, instrumentId, ask, bid):
+        """
+        处理止盈
+        """
+        openPositionList = self.getPositionList(state='open')
+        for position in openPositionList:
+            direction = position.direction
+            price = {'buy': ask, 'sell': bid}[direction]
+            la = {'buy': lambda x: price>=x, 'sell': lambda x: price>=x}[direction]
+            if position.profitPrice != 0:
+                if la(position.profitPrice):
+                    self.closePosition(position.id)
+
+
 
     def onDataArrived(self, instrumentId, ask, bid):
         """
         品种的最近报价到达
         """
+        # 处理止损
+        self.processStopPrice(instrumentId, ask, bid)
+        # 处理止盈
+        self.processProfitPrice(instrumentId, ask, bid)
         # 处理开仓报单
         self.processOpenOrder(instrumentId, ask, bid)
         # 处理平仓报单
