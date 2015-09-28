@@ -461,14 +461,6 @@ class SimulateTrader(Trader):
         # 调用父类构造函数
         super(SimulateTrader, self).__init__(modelStrategyExecuter)
 
-        # 初始化报单处理列表
-        self.openOrderList = []
-        self.closeOrderList = []
-        self.cancelOrderList = []
-        self.setstopOrderList = []
-        self.setprofitOrderList = []
-        self.orderLock = threading.RLock()
-
     def working(self):
         """
         工作线程方法
@@ -491,8 +483,6 @@ class SimulateTrader(Trader):
         处理开仓报单
         NOTE: 这里可能和取消订单操作出现资源争用问题
         """
-        orderFinish = []
-
         def _openPosition(order, price):
             # 设置成交报价
             position = order.position
@@ -500,10 +490,10 @@ class SimulateTrader(Trader):
             position.openPrice = price
             # 触发成交事件
             self.onPositionOpened(order, position)
-            orderFinish.append(order)
 
         # 尝试处理所有开仓报单
-        for order in self.openOrderList:
+        openOrderList = self.getOrderList(action='open', state='insert')
+        for order in openOrderList:
             if order.instrumentId == instrumentId:
                 direction = order.direction
                 limitPrice = order.openLimitPrice
@@ -514,20 +504,11 @@ class SimulateTrader(Trader):
                 else:
                     if la(limitPrice):
                         _openPosition(order, (price + limitPrice) / 2)
-        # 处理完成
-        self.orderLock.acquire()
-        try:
-            for order in orderFinish:
-                self.openOrderList.remove(order)
-        finally:
-            self.orderLock.release()
 
     def processCloseOrder(self, instrumentId, ask, bid):
         """
         平仓订单处理
         """
-        orderFinish = []
-
         def _closePosition(order, price):
             # 设置成交报价
             position = order.position
@@ -535,9 +516,9 @@ class SimulateTrader(Trader):
             position.closePrice = price
             # 触发成交事件
             self.onPositionClosed(order, position)
-            orderFinish.append(order)
 
-        for order in self.closeOrderList:
+        closeOrderList = self.getOrderList(action='close', state='insert')
+        for order in closeOrderList:
             if order.instrumentId == instrumentId:
                 direction = order.direction
                 limitPrice = order.closeLimitPrice
@@ -548,31 +529,25 @@ class SimulateTrader(Trader):
                 else:
                     if la(limitPrice):
                         _closePosition(order, (price + limitPrice) / 2)
-        # 处理完成
-        self.orderLock.acquire()
-        try:
-            for order in orderFinish:
-                self.closeOrderList.remove(order)
-        finally:
-            self.orderLock.release()
 
     def processCancelOrder(self):
         """
         取消订单操作
         """
-        for order in self.cancelOrderList:
+        cancelOrderList = self.getOrderList(action='cancel', state='insert')
+        for order in cancelOrderList:
             toOrder = order.order
-            self.orderLock.acquire()
-            try:
-                if self.openOrderList.count(toOrder) != 0:
-                    self.openOrderList.remove(toOrder)
-                    self.onOrderCanceled(order, toOrder)
-                else:
-                    errorId, errorMsg = error.OrderNoActive
-                    self.onCancelOrderError(order, errorId, errorMsg, toOrder)
-                self.cancelOrderList.remove(order)
-            finally:
-                self.orderLock.release()
+            if len(self.getOrderList(id=toOrder.id, state='insert')) >= 1:
+                self.onOrderCanceled(order, toOrder)
+            else:
+                errorId, errorMsg = error.OrderNoActive
+                self.onCancelOrderError(order, errorId, errorMsg, toOrder)
+
+    def processStopPrice(self):
+        """
+        处理止损
+        """
+        pass
 
     def onDataArrived(self, instrumentId, ask, bid):
         """
@@ -590,11 +565,6 @@ class SimulateTrader(Trader):
         打开头寸的处理
         """
         order = super(SimulateTrader, self).openPosition(*args, **kwargs)
-        self.orderLock.acquire()
-        try:
-            self.openOrderList.append(order)
-        finally:
-            self.orderLock.release()
         return order
 
     def closePosition(self, *args, **kwargs):
@@ -602,11 +572,6 @@ class SimulateTrader(Trader):
         关闭头寸的处理
         """
         order = super(SimulateTrader, self).closePosition(*args, **kwargs)
-        self.orderLock.acquire()
-        try:
-            self.closeOrderList.append(order)
-        finally:
-            self.orderLock.release()
         return order
 
     def cancelOrder(self, *args, **kwargs):
@@ -614,10 +579,5 @@ class SimulateTrader(Trader):
         撤单处理
         """
         order = super(SimulateTrader, self).cancelOrder(*args, **kwargs)
-        self.orderLock.acquire()
-        try:
-            self.cancelOrderList.append(order)
-        finally:
-            self.orderLock.release()
         return order
 

@@ -91,6 +91,7 @@ def test_close_position():
     # 打开一个头寸以供关闭使用
     order = trader.openPosition(instrumentId, 'buy')
     trader.onDataArrived(instrumentId, ask, bid)
+    order = ModelOrder.objects.get(id=order.id)
     position = order.position
     assert order.state == 'finish'
     assert position.state == 'open'
@@ -119,6 +120,7 @@ def test_close_position_with_limit_price():
     # 打开一个头寸以供关闭使用
     order = trader.openPosition(instrumentId, 'buy')
     trader.onDataArrived(instrumentId, ask, bid)
+    order = ModelOrder.objects.get(id=order.id)
     position = order.position
     assert order.state == 'finish'
     assert position.state == 'open'
@@ -188,6 +190,7 @@ def test_cancel_order():
     cancelOrder = trader.cancelOrder(order.id)
     assert len(trader.getOrderList(action='cancel', state='insert')) == 1
     trader.onDataArrived(instrumentId, ask=105, bid=110)
+    cancelOrder = ModelOrder.objects.get(id=cancelOrder.id)
     order = ModelOrder.objects.get(id=order.id)
     position = ModelPosition.objects.get(id=position.id)
     assert len(trader.getOrderList(action='cancel', state='insert')) == 0
