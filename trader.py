@@ -544,6 +544,16 @@ class SimulateTrader(Trader):
                 errorId, errorMsg = error.OrderNoActive
                 self.onCancelOrderError(order, errorId, errorMsg, toOrder)
 
+    def processSetStopPrice(self):
+        """
+        处理止损设置
+        """
+        setStopOrderList = self.getOrderList(action='setstop', state='insert')
+        for order in setStopOrderList:
+            position = order.position
+            self.onStopPriceSetted(order, position)
+
+
     def processStopPrice(self, instrumentId, ask, bid):
         """
         处理止损
@@ -576,6 +586,8 @@ class SimulateTrader(Trader):
         """
         品种的最近报价到达
         """
+        # 处理止损设置
+        self.processSetStopPrice()
         # 处理止损
         self.processStopPrice(instrumentId, ask, bid)
         # 处理止盈

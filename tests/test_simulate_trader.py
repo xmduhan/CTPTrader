@@ -251,7 +251,33 @@ def test_set_stop_price():
     """
     测试设置止盈
     """
-    assert False
+    trader = SimulateTrader()
+    instrumentId = getDefaultInstrumentID()
+
+    # 创建一个头寸
+    order = trader.openPosition(instrumentId, 'sell')
+    trader.onDataArrived(instrumentId, ask=100, bid=105)
+    order = ModelOrder.objects.get(id=order.id)
+    position = order.position
+    assert order.state == 'finish'
+    assert position.state == 'open'
+    assert position.profitPrice == 0
+
+    # 发出一个高价,但无设置止损,头寸不会关闭
+    trader.onDataArrived(instrumentId, ask=110, bid=115)
+    position = ModelPosition.objects.get(id=position.id)
+    assert position.state == 'open'
+
+    # 设置止损价格
+    trader.setStopPrice(position.id, 115)
+    position = ModelPosition.objects.get(id=position.id)
+    assert position.stopPrice == 115
+
+    # 发出一个高价检查头寸是否关闭
+    trader.onDataArrived(instrumentId, ask=110, bid=115)
+    position = ModelPosition.objects.get(id=position.id)
+    assert position.state == 'close'
+    assert position.closePrice == 115
 
 
 def test_set_profit_price():
