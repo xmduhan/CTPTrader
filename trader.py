@@ -2,11 +2,12 @@
 # encoding: utf-8
 from __future__ import division
 from database.models import ModelPosition, ModelOrder
-from django.db.models import Q
 from datetime import datetime
 from comhelper import CallbackManager
 import threading
 import error
+import uuid
+
 
 class Trader(object):
 
@@ -462,11 +463,20 @@ class SimulateTrader(Trader):
         # 调用父类构造函数
         super(SimulateTrader, self).__init__(modelStrategyExecuter)
 
+        # 线程退出标识
+        self.__running = False
+
+    def getRandomAddress():
+        """
+        获取一个随机的监听地址
+        """
+        return 'ipc:///tmp/%s' % uuid.uuid1()
+
     def working(self):
         """
         工作线程方法
         """
-        while True:
+        while self.__running:
             # 更新报价数据
             pass
             # 处理报单数据
@@ -476,8 +486,17 @@ class SimulateTrader(Trader):
         启动工作线程
         """
         # 创建工作线程
-        self.thread = threading.Thread(target=self.working)
-        self.thread.start()
+        if self.__running == False:
+            self.__running = True
+            self.thread = threading.Thread(target=self.working)
+            self.thread.start()
+
+    def stop(self):
+        """
+        停止工作线程
+        """
+        self.__running = False
+
 
     def processOpenOrder(self, instrumentId, ask, bid):
         """

@@ -3,14 +3,32 @@
 from __future__ import division
 from trader import SimulateTrader
 from comhelper import getDefaultInstrumentID
-from database.models import ModelOrder, ModelPosition
+from database.models import ModelOrder, ModelPosition, ModelStrategyExecuter, ModelDataGenerator
 import error
 
 
+modelStrategyExecuter = ModelStrategyExecuter()
+modelDataGenerator = ModelDataGenerator()
+
 def setup():
     """
+    创建测试需要的数据
     """
-    pass
+    global modelStrategyExecuter, modelDataGenerator
+    # 创建一个测试使用的数据生成器
+    modelDataGenerator.code = 'TestGenerator1'
+    modelDataGenerator.name = u'测试数据生成器1'
+    modelDataGenerator.dataSource = 'database'
+    modelDataGenerator.instrumentIdList = '["%s"]' % getDefaultInstrumentID()
+    modelDataGenerator.save()
+
+    # 创建一个测试使用的策略执行器
+    modelStrategyExecuter.code = 'TestExecuter1'
+    modelStrategyExecuter.name = u'测试执行器1'
+    modelStrategyExecuter.dataGenerator = modelDataGenerator
+    modelStrategyExecuter.instrumentIdList = '["%s"]' % getDefaultInstrumentID()
+    modelStrategyExecuter.traderClass = 'SimulateTrader'
+    modelStrategyExecuter.save()
 
 
 def test_open_position():
@@ -309,6 +327,18 @@ def test_working_thread_running():
     """
     测试工作线程可以正常运行
     """
-    assert False
+    global modelStrategyExecuter, modelDataGenerator
+
+    trader = SimulateTrader(modelStrategyExecuter)
+    instrumentId = getDefaultInstrumentID()
+
+    # 启动工作线程
+    trader.start()
+    try:
+        pass
+    finally:
+        # 停止工作线程
+        trader.stop()
+
 
 
