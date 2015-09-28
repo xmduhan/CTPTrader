@@ -553,6 +553,14 @@ class SimulateTrader(Trader):
             position = order.position
             self.onStopPriceSetted(order, position)
 
+    def processSetProfitPrice(self):
+        """
+        处理止盈设置
+        """
+        setProfitOrderList = self.getOrderList(action='setprofit', state='insert')
+        for order in setProfitOrderList:
+            position = order.position
+            self.onProfitPriceSetted(order,position)
 
     def processStopPrice(self, instrumentId, ask, bid):
         """
@@ -580,14 +588,14 @@ class SimulateTrader(Trader):
                 if la(position.profitPrice):
                     self.closePosition(position.id)
 
-
-
     def onDataArrived(self, instrumentId, ask, bid):
         """
         品种的最近报价到达
         """
         # 处理止损设置
         self.processSetStopPrice()
+        # 处理止盈设置
+        self.processSetProfitPrice()
         # 处理止损
         self.processStopPrice(instrumentId, ask, bid)
         # 处理止盈
