@@ -486,7 +486,7 @@ class SimulateTrader(Trader):
         启动工作线程
         """
         # 创建工作线程
-        if self.__running == False:
+        if self.__running is False:
             self.__running = True
             self.thread = threading.Thread(target=self.working)
             self.thread.start()
@@ -496,7 +496,6 @@ class SimulateTrader(Trader):
         停止工作线程
         """
         self.__running = False
-
 
     def processOpenOrder(self, instrumentId, ask, bid):
         """
@@ -579,7 +578,7 @@ class SimulateTrader(Trader):
         setProfitOrderList = self.getOrderList(action='setprofit', state='insert')
         for order in setProfitOrderList:
             position = order.position
-            self.onProfitPriceSetted(order,position)
+            self.onProfitPriceSetted(order, position)
 
     def processStopPrice(self, instrumentId, ask, bid):
         """
@@ -646,4 +645,3 @@ class SimulateTrader(Trader):
         """
         order = super(SimulateTrader, self).cancelOrder(*args, **kwargs)
         return order
-
