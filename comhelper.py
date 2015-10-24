@@ -121,4 +121,4 @@ def getInstrumentLimitPrice():
     """
     获取品种的最高和最低限价
     """
-    pass
+    return 0, 0

@@ -56,6 +56,8 @@ WSGI_APPLICATION = 'CTPTrader.wsgi.application'
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
+NOSE_ARGS = ['--nocapture', '--attr=!ctp']
+
 # Database
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
 
