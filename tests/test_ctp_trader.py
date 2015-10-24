@@ -48,6 +48,17 @@ def waitForResponse(flag, second):
 
 
 @attr('ctp')
+def test_ctp_trader_clean_self():
+    """
+    测试CTPTrader可以进行对象清理
+    """
+    trader = CTPTrader(frontAddress, brokerID, userID, password)
+    assert trader
+    trader = None
+    assert False
+
+
+@attr('ctp')
 def test_open_position_and_close():
     """
     测试打开头寸打开头寸并且立马将其关闭
