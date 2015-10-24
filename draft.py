@@ -23,7 +23,7 @@
 1、准备实验环境,构造一个可以打开和关闭头寸的脚本准备
 1、在comhelper中实现getInstrumentLimitPrice
 1、在test_ctp_trader中尝试实现一个waitForResponse()代替循环
-
+1、CallbackManager应该增加个单独文件,不应该放在comhelper.py
 
 ---------------------
 1、traderType如何表示是个问题,目前('ctp','simulate'),是否直接存储类名称更好
