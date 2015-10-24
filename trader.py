@@ -645,3 +645,10 @@ class SimulateTrader(Trader):
         """
         order = super(SimulateTrader, self).cancelOrder(*args, **kwargs)
         return order
+
+
+class CTPTrader(Trader):
+    """
+    CTP交易接口
+    """
+    pass
