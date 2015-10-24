@@ -115,3 +115,10 @@ class CallbackManager(object):
                     print e
         finally:
             self.__callbackLock.release()
+
+
+def getInstrumentLimitPrice():
+    """
+    获取品种的最高和最低限价
+    """
+    pass
