@@ -374,4 +374,3 @@ class ModelTest(models.Model):
     进行多线程测试使用
     """
     a = models.IntegerField(u'测试字段', blank=True, null=True)
-

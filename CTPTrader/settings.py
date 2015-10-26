@@ -57,7 +57,7 @@ WSGI_APPLICATION = 'CTPTrader.wsgi.application'
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 NOSE_ARGS = ['--nocapture', '--attr=!ctp']
-#NOSE_ARGS = ['--nocapture']
+# NOSE_ARGS = ['--nocapture']
 
 # Database
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
@@ -66,9 +66,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        'TEST': {
-            'NAME': os.path.join(BASE_DIR, 'test_db.sqlite3')
-        }
+        'TEST_NAME': os.path.join(BASE_DIR, 'test_db.sqlite3'),
     }
 }
 
