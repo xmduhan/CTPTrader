@@ -4,9 +4,11 @@ from __future__ import division
 from database.models import ModelPosition, ModelOrder
 from datetime import datetime
 from callback import CallbackManager
+from comhelper import orderId2Ref
 import threading
 import error
 import uuid
+import pyctp
 
 
 class Trader(object):
@@ -651,8 +653,123 @@ class CTPTrader(Trader):
     """
     CTP交易接口
     """
+
     def __init__(self, frontAddress, brokerID, userID, password, modelStrategyExecuter=None):
         """
         初始化处理
         """
-        pass
+        # 保存ctp信息到实例变量
+        self.frontAddress = frontAddress
+        self.brokerID = brokerID
+        self.userID = userID
+        self.password = password
+
+        # 创建CTP Trader交易接口
+        self.ctp = pyctp.Trader(frontAddress, brokerID, userID, password)
+
+        # 绑定ctp接口的相关回调函数
+        self.ctp.bind(pyctp.callback.OnRspOrderInsert, self.__OnRspOrderInsert)
+        self.ctp.bind(pyctp.callback.OnErrRtnOrderInsert, self.__OnErrRtnOrderInsert)
+        self.ctp.bind(pyctp.callback.OnRtnOrder, self.__OnRtnOrder)
+        self.ctp.bind(pyctp.callback.OnRtnTrade, self.__OnRtnTrade)
+
+        # 调用父类构造函数
+        super(CTPTrader, self).__init__(modelStrategyExecuter)
+
+    def __OnRspOrderInsert(self, **kwargs):
+        """
+        报单插入回报
+        NOTE: 实际上只有出错的情况下才回收到这个回报信息
+        """
+        errorId = kwargs['RspInfo']['ErrorID']
+        errorMsg = kwargs['RspInfo']['ErrorMsg']
+        print 'OnRspOrderInsert() : ErrorId=%d, ErrorMsg=%s' % (errorId, errorMsg)
+
+    def __OnErrRtnOrderInsert(self, **kwargs):
+        """
+        报单出错回报
+        """
+        errorId = kwargs['RspInfo']['ErrorID']
+        errorMsg = kwargs['RspInfo']['ErrorMsg']
+        print 'OnErrRtnOrderInsert() : ErrorId=%d, ErrorMsg=%s' % (errorId, errorMsg)
+
+    def __OnRtnOrder(self, **kwargs):
+        """
+        订单状态修改回报信息
+        """
+        orderStatus = kwargs['Data']['OrderStatus']
+        statusMsg = kwargs['Data']['StatusMsg']
+        print 'OnRtnOrder() : OrderStatus=%s, StatusMsg=%s' % (orderStatus, statusMsg)
+
+    def __OnRtnTrade(self, **kwargs):
+        """
+        订单处理完成回报
+        NOTE: 只有订单处理成功才会收到此信息
+        """
+        print 'OnRtnTrade() : 已调用，报单执行成功!'
+        print(kwargs['Data'])
+
+    def __getInsertOrderField(self, order):
+        """
+        获取一个有效的建单数据格式
+        将报单转化为CTP报单格式
+        """
+        inputOrderField = pyctp.struct.CThostFtdcInputOrderField()
+        inputOrderField.BrokerID = self.brokerID
+        inputOrderField.InvestorID = self.userID
+        inputOrderField.InstrumentID = order.instrumentId
+        inputOrderField.OrderRef = orderId2Ref(order.orderId)  # 将orderId转化为CTP接口的orderRef
+        inputOrderField.UserID = self.userID
+        inputOrderField.OrderPriceType = '1'  # 任意价
+
+        # inputOrderField.Direction = '0'  # 买
+        # inputOrderField.CombOffsetFlag = '0'  # 开仓
+        if order.action == 'open':
+            inputOrderField.CombOffsetFlag = '0'
+            inputOrderField.Direction = {'buy': '0', 'sell': '1'}[order.direction]
+        elif order.action == 'close':
+            inputOrderField.CombOffsetFlag = '1'
+            inputOrderField.Direction = {'buy': '1', 'sell': '0'}[order.direction]
+        else:
+            raise Exception(u'未知的操作方向')
+
+        inputOrderField.CombHedgeFlag = '1'  # 投机
+        inputOrderField.LimitPrice = 0  # 限价 0表不限制
+        inputOrderField.VolumeTotalOriginal = order.volume  # 手数
+        inputOrderField.TimeCondition = '1'  # 立即完成否则撤消
+        inputOrderField.GTDDate = ''
+        inputOrderField.VolumeCondition = '1'  # 成交类型  '1' 任何数量  '2' 最小数量 '3'全部数量
+        inputOrderField.MinVolume = order.volume  # 最小数量
+        inputOrderField.ContingentCondition = '1'  # 触发类型 '1' 立即否则撤消
+        inputOrderField.StopPrice = 0  # 止损价
+        inputOrderField.ForceCloseReason = '0'  # 强平标识 '0'非强平
+        inputOrderField.IsAutoSuspend = 0  # 自动挂起标识
+        inputOrderField.BusinessUnit = ''  # 业务单元
+        inputOrderField.RequestID = 1
+        inputOrderField.UserForceClose = 0  # 用户强平标识
+        inputOrderField.IsSwapOrder = 0  # 互换单标识
+        return inputOrderField
+
+    def openPosition(self, *args, **kwargs):
+        """
+        打开头寸的处理
+        """
+        # 调用父类方法
+        order = super(CTPTrader, self).openPosition(*args, **kwargs)
+        # 向CTP接口进行报单操作
+        data = self.__getInsertOrderField(order)
+        self.ctp.ReqOrderInsert(data)
+        # 返回报单的数据实例
+        return order
+
+    def closePosition(self, *args, **kwargs):
+        """
+        关闭头寸的处理
+        """
+        # 调用父类方法
+        order = super(CTPTrader, self).closePosition(*args, **kwargs)
+        # 向CTP接口进行报单操作
+        data = self.__getInsertOrderField(order)
+        self.ctp.ReqOrderInsert(data)
+        # 返回报单的数据实例
+        return order

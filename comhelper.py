@@ -40,3 +40,12 @@ def getInstrumentLimitPrice():
     获取品种的最高和最低限价
     """
     return 0, 0
+
+
+def orderId2Ref(orderId):
+    """
+    将orderId转化为CTP接口的orderRef
+    orderId
+    返回 CTP接口要求的orderRef
+    """
+    return ('%12d' % orderId).replace(' ', '0')
