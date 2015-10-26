@@ -709,6 +709,29 @@ class CTPTrader(Trader):
         print 'OnRtnTrade() : 已调用，报单执行成功!'
         print(kwargs['Data'])
 
+        # 读取CTP接口的返回数据
+        data = kwargs['Data']
+        orderRef = data['OrderRef']
+        print '-----1-----'
+
+        # 关联出原始报单对象和头寸信息
+        orderId = int(orderRef)
+        print '-----2-----'
+        order = ModelOrder.objects.get(id=orderId)
+        print '-----3-----'
+        position = order.position
+        print '-----4-----'
+
+        # TODO: 读取并设置成交价格
+
+        if order.action == 'open':
+            print 'self.onPositionOpened:begin'
+            self.onPositionOpened(order, position)
+            print 'self.onPositionOpened:begin'
+
+        if order.action == 'close':
+            self.onPositionClosed(order, position)
+
     def __getInsertOrderField(self, order):
         """
         获取一个有效的建单数据格式
@@ -718,7 +741,7 @@ class CTPTrader(Trader):
         inputOrderField.BrokerID = self.brokerID
         inputOrderField.InvestorID = self.userID
         inputOrderField.InstrumentID = order.instrumentId
-        inputOrderField.OrderRef = orderId2Ref(order.orderId)  # 将orderId转化为CTP接口的orderRef
+        inputOrderField.OrderRef = orderId2Ref(order.id)  # 将orderId转化为CTP接口的orderRef
         inputOrderField.UserID = self.userID
         inputOrderField.OrderPriceType = '1'  # 任意价
 

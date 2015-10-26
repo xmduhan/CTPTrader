@@ -367,3 +367,11 @@ class ModelOrder(models.Model):
         verbose_name = u'报单记录'
         verbose_name_plural = u'[08].报单记录'
         ordering = ['finishTime']
+
+
+class ModelTest(models.Model):
+    """
+    进行多线程测试使用
+    """
+    a = models.IntegerField(u'测试字段', blank=True, null=True)
+

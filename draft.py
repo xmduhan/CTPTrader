@@ -25,6 +25,28 @@
 1、在test_ctp_trader中尝试实现一个waitForResponse()代替循环
 1、CallbackManager应该增加个单独文件,不应该放在comhelper.py
 
+----------------------------------------------------------
+
+django 多线程测试问题(数据访问)
+参考1
+https://code.djangoproject.com/ticket/12118
+
+参考2
+http://stackoverflow.com/questions/10948537/database-errors-in-django-when-using-threading
+
+参考3
+http://stackoverflow.com/questions/27174226/running-django-with-a-sqlite-in-memory-database
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        ...
+        'TEST': {
+            'NAME': '/path/to/the/db/file'
+        }
+    }
+}
+
 ---------------------
 1、traderType如何表示是个问题,目前('ctp','simulate'),是否直接存储类名称更好
 1、一定需要openlimit和closelimit两种订单类型吗?
