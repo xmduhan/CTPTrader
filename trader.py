@@ -651,4 +651,8 @@ class CTPTrader(Trader):
     """
     CTP交易接口
     """
-    pass
+    def __init__(self, frontAddress, brokerID, userID, password, modelStrategyExecuter=None):
+        """
+        初始化处理
+        """
+        pass
