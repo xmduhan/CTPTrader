@@ -22,10 +22,12 @@
 1、准备实验环境,构造一个可以打开和关闭头寸的脚本准备(ok)
 1、CallbackManager应该增加个单独文件,不应该放在comhelper.py(ok)
 1、实现CTPTrader的打开和关闭头寸(ok)
+1、完成测试用例test_ctp_trader_clean_self(ok)
+1、修改waitForResponse的参数为表达式(ok)
 
 # ---------------------------------------------
-1、修改waitForResponse的参数为表达式
-1、完成测试用例test_ctp_trader_clean_self
+1、日志处理问题(解决print问题)
+1、处理服务端错误问题
 1、在comhelper中实现getInstrumentLimitPrice
 
 ----------------------------------------------------------

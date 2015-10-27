@@ -737,9 +737,11 @@ class _CTPTrader(Trader):
         """
         订单状态修改回报信息
         """
-        orderStatus = kwargs['Data']['OrderStatus']
-        statusMsg = kwargs['Data']['StatusMsg']
+        data = kwargs['Data']
+        orderStatus = data['OrderStatus']
+        statusMsg = data['StatusMsg']
         print 'OnRtnOrder() : OrderStatus=%s, StatusMsg=%s' % (orderStatus, statusMsg)
+        print data
 
     def __OnRtnTrade(self, **kwargs):
         """
