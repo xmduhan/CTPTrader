@@ -5,7 +5,7 @@ import os
 from trader import CTPTrader
 from comhelper import getDefaultInstrumentID
 from comhelper import getInstrumentLimitPrice
-from time import sleep
+from comhelper import waitForResponse
 from nose.plugins.attrib import attr
 
 frontAddress = None
@@ -32,20 +32,6 @@ def setup():
     global instrumentId, buyLimitPrice, sellLimitPrice
     instrumentId = getDefaultInstrumentID()
     buyLimitPrice, sellLimitPrice = getInstrumentLimitPrice()
-
-
-def waitForResponse(flag, second):
-    """
-    等待服务器响应
-    flag 一个列表,如果为空则会继续等待直到超时
-    second 等待的时间，单位:秒
-    """
-    for i in range(second):
-        if flag:
-            break
-        sleep(1)
-    else:
-        assert False
 
 
 @attr('ctp')
@@ -78,7 +64,7 @@ def test_open_position_and_close():
     flag = []
     trader.openPosition(instrumentId, 'buy', 1)
     waitForResponse(flag, 5)
-    position = flag[1]
+    position = flag[0][1]
 
     # 尝试关闭头寸
     flag = []

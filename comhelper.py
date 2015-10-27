@@ -4,6 +4,7 @@ import sys
 import django
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+from time import sleep
 
 
 def getProjectPath():
@@ -49,3 +50,17 @@ def orderId2Ref(orderId):
     返回 CTP接口要求的orderRef
     """
     return ('%12d' % orderId).replace(' ', '0')
+
+
+def waitForResponse(flag, second=5):
+    """
+    等待服务器响应
+    flag 一个列表,如果为空则会继续等待直到超时
+    second 等待的时间，单位:秒
+    """
+    for i in range(second):
+        if flag:
+            break
+        sleep(1)
+    else:
+        raise Exception('等待响应超时')

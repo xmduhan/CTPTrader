@@ -5,6 +5,7 @@ from database.models import ModelPosition, ModelOrder
 from datetime import datetime
 from callback import CallbackManager
 from comhelper import orderId2Ref
+from comhelper import waitForResponse
 import threading
 import error
 import uuid
@@ -666,6 +667,7 @@ class CTPTrader(Trader):
 
         # 创建CTP Trader交易接口
         self.ctp = pyctp.Trader(frontAddress, brokerID, userID, password)
+        self.__SettlementInfoConfirm()
 
         # 绑定ctp接口的相关回调函数
         self.ctp.bind(pyctp.callback.OnRspOrderInsert, self.__OnRspOrderInsert)
@@ -675,6 +677,31 @@ class CTPTrader(Trader):
 
         # 调用父类构造函数
         super(CTPTrader, self).__init__(modelStrategyExecuter)
+
+    def __SettlementInfoConfirm(self):
+        """
+        确认昨日成交信息
+        """
+        result = []
+
+        def OnRspSettlementInfoConfirm(**kwargs):
+            result.append(kwargs)
+
+        # 调用确认交易信息接口
+        self.ctp.bind(pyctp.callback.OnRspSettlementInfoConfirm, OnRspSettlementInfoConfirm)
+        data = pyctp.struct.CThostFtdcSettlementInfoConfirmField()
+        data.BrokerID = self.brokerID
+        data.InvestorID = self.userID
+        data.ConfirmDate = ''
+        data.ConfirmTime = ''
+        self.ctp.ReqSettlementInfoConfirm(data)
+        waitForResponse(result)
+
+        # 检查返回结果
+        errorId = result[0]['RspInfo']['ErrorID']
+        errorMsg = result[0]['RspInfo']['ErrorMsg']
+        if errorId != 0:
+            raise Exception("%d:%s" % (errorId, errorMsg))
 
     def __OnRspOrderInsert(self, **kwargs):
         """
@@ -712,22 +739,16 @@ class CTPTrader(Trader):
         # 读取CTP接口的返回数据
         data = kwargs['Data']
         orderRef = data['OrderRef']
-        print '-----1-----'
 
         # 关联出原始报单对象和头寸信息
         orderId = int(orderRef)
-        print '-----2-----'
         order = ModelOrder.objects.get(id=orderId)
-        print '-----3-----'
         position = order.position
-        print '-----4-----'
 
         # TODO: 读取并设置成交价格
 
         if order.action == 'open':
-            print 'self.onPositionOpened:begin'
             self.onPositionOpened(order, position)
-            print 'self.onPositionOpened:begin'
 
         if order.action == 'close':
             self.onPositionClosed(order, position)
@@ -796,3 +817,13 @@ class CTPTrader(Trader):
         self.ctp.ReqOrderInsert(data)
         # 返回报单的数据实例
         return order
+
+
+def function(arg1):
+    """TODO: Docstring for function.
+
+    :arg1: TODO
+    :returns: TODO
+
+    """
+    pass
