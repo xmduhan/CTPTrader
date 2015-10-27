@@ -5,7 +5,7 @@ import os
 from trader import CTPTrader
 from comhelper import getDefaultInstrumentID
 from comhelper import getInstrumentLimitPrice
-from comhelper import waitForResponse
+from comhelper import wait
 from nose.plugins.attrib import attr
 from database.models import ModelOrder, ModelPosition
 import psutil
@@ -48,7 +48,10 @@ def test_ctp_trader_clean_self():
     assert trader
     children = [child.pid for child in process.children()]
     assert len(children) == count + 1
+    # trader.ctp = None
     trader = None
+    wait(lambda: len([child.pid for child in process.children()]) == count)
+
 
 @attr('ctp')
 def test_open_position_and_close():
@@ -71,7 +74,7 @@ def test_open_position_and_close():
     position = order.position
     assert order.state == 'insert'
     assert position.state == 'preopen'
-    waitForResponse(flag, 5)
+    wait(lambda: len(flag)>0)
     order = ModelOrder.objects.get(id=order.id)
     position = ModelPosition.objects.get(id=position.id)
     assert order.state == 'finish'
@@ -85,7 +88,7 @@ def test_open_position_and_close():
     position = ModelPosition.objects.get(id=position.id)
     assert order.state == 'insert'
     assert position.state == 'preclose'
-    waitForResponse(flag, 5)
+    wait(lambda: len(flag)>0)
     order = ModelOrder.objects.get(id=order.id)
     position = ModelPosition.objects.get(id=position.id)
     assert order.state == 'finish'
@@ -110,7 +113,7 @@ def test_open_position_with_error_args():
     position = order.position
     assert order.state == 'insert'
     assert position.state == 'preopen'
-    waitForResponse(flag, 5)
+    wait(lambda: len(flag)>0)
     order = ModelOrder.objects.get(id=order.id)
     position = ModelPosition.objects.get(id=position.id)
     assert order.state == 'error'

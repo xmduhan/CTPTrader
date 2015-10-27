@@ -52,18 +52,19 @@ def orderId2Ref(orderId):
     return ('%12d' % orderId).replace(' ', '0')
 
 
-def waitForResponse(flag, second=5):
+def wait(expr, second=5):
     """
     等待服务器响应
-    flag 一个列表,如果为空则会继续等待直到超时
+    expr 一个lambda表达式，如果表达式执行返回True则退出循环
     second 等待的时间，单位:秒
     """
+    t0 = datetime.now()
+    t1 = t0
     toWaitOnce = .01
-    waited = 0
-    while waited < second:
-        if flag:
+    while (t1 - t0).total_seconds() < second:
+        if expr():
             break
         sleep(toWaitOnce)
-        waited += toWaitOnce
+        t1 = datetime.now()
     else:
-        raise Exception('等待响应超时')
+        raise Exception('等待超时')

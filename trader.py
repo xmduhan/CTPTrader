@@ -5,7 +5,7 @@ from database.models import ModelPosition, ModelOrder
 from datetime import datetime
 from callback import CallbackManager
 from comhelper import orderId2Ref
-from comhelper import waitForResponse
+from comhelper import wait
 import threading
 import error
 import uuid
@@ -695,7 +695,7 @@ class CTPTrader(Trader):
         data.ConfirmDate = ''
         data.ConfirmTime = ''
         self.ctp.ReqSettlementInfoConfirm(data)
-        waitForResponse(result)
+        wait(lambda: len(result)>0)
 
         # 检查返回结果
         errorId = result[0]['RspInfo']['ErrorID']
