@@ -10,7 +10,7 @@ import threading
 import error
 import uuid
 import pyctp
-
+import inspect
 
 class Trader(object):
 
@@ -650,7 +650,7 @@ class SimulateTrader(Trader):
         return order
 
 
-class CTPTrader(Trader):
+class _CTPTrader(Trader):
     """
     CTP交易接口
     """
@@ -676,7 +676,7 @@ class CTPTrader(Trader):
         self.ctp.bind(pyctp.callback.OnRtnTrade, self.__OnRtnTrade)
 
         # 调用父类构造函数
-        super(CTPTrader, self).__init__(modelStrategyExecuter)
+        super(_CTPTrader, self).__init__(modelStrategyExecuter)
 
     def __SettlementInfoConfirm(self):
         """
@@ -814,7 +814,7 @@ class CTPTrader(Trader):
         打开头寸的处理
         """
         # 调用父类方法
-        order = super(CTPTrader, self).openPosition(*args, **kwargs)
+        order = super(_CTPTrader, self).openPosition(*args, **kwargs)
         # 向CTP接口进行报单操作
         data = self.__getInsertOrderField(order)
         self.ctp.ReqOrderInsert(data)
@@ -826,7 +826,7 @@ class CTPTrader(Trader):
         关闭头寸的处理
         """
         # 调用父类方法
-        order = super(CTPTrader, self).closePosition(*args, **kwargs)
+        order = super(_CTPTrader, self).closePosition(*args, **kwargs)
         # 向CTP接口进行报单操作
         data = self.__getInsertOrderField(order)
         self.ctp.ReqOrderInsert(data)
@@ -834,11 +834,16 @@ class CTPTrader(Trader):
         return order
 
 
-def function(arg1):
-    """TODO: Docstring for function.
-
-    :arg1: TODO
-    :returns: TODO
-
+class CTPTrader(object):
     """
-    pass
+    CTPTrader的代理类要用用于工作线程的清理
+    """
+    def __init__(self, *args, **kwargs):
+        self.__trader = _CTPTrader(*args, **kwargs)
+        for name, method in inspect.getmembers(self.__trader, predicate=inspect.ismethod):
+            if name[0] != '_':
+                setattr(self, name, method)
+
+    def __del__(self):
+        self.__trader.ctp = None
+        self.__trader = None
