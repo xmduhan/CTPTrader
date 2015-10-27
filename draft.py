@@ -29,6 +29,7 @@
 1、日志处理问题(解决print问题)
 1、处理服务端错误问题
 1、在comhelper中实现getInstrumentLimitPrice
+1、为SimulateTrader增加工作线程的支持
 
 ----------------------------------------------------------
 
