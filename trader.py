@@ -745,12 +745,14 @@ class CTPTrader(Trader):
         order = ModelOrder.objects.get(id=orderId)
         position = order.position
 
-        # TODO: 读取并设置成交价格
-
         if order.action == 'open':
+            order.openPrice = data['Price']
+            position.openPrice = data['Price']
             self.onPositionOpened(order, position)
 
         if order.action == 'close':
+            order.closePrice = data['Price']
+            position.closePrice = data['Price']
             self.onPositionClosed(order, position)
 
     def __getInsertOrderField(self, order):

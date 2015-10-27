@@ -7,6 +7,7 @@ from comhelper import getDefaultInstrumentID
 from comhelper import getInstrumentLimitPrice
 from comhelper import waitForResponse
 from nose.plugins.attrib import attr
+from database.models import ModelOrder, ModelPosition
 
 frontAddress = None
 brokerID = None
@@ -62,14 +63,35 @@ def test_open_position_and_close():
 
     # 尝试打开头寸
     flag = []
-    trader.openPosition(instrumentId, 'buy', 1)
+    order = trader.openPosition(instrumentId, 'buy', 1)
+    position = order.position
+    assert order.state == 'insert'
+    assert position.state == 'preopen'
     waitForResponse(flag, 5)
-    position = flag[0][1]
+    order = ModelOrder.objects.get(id=order.id)
+    position = ModelPosition.objects.get(id=position.id)
+    assert order.state == 'finish'
+    assert position.state == 'open'
+    assert position.openPrice
+    assert order.openPrice
+    print 'position.openPrice =', position.openPrice
+    print 'order.openPrice =', order.openPrice
 
     # 尝试关闭头寸
     flag = []
-    trader.closePosition(position.id)
+    order = trader.closePosition(position.id)
+    position = ModelPosition.objects.get(id=position.id)
+    assert order.state == 'insert'
+    assert position.state == 'preclose'
     waitForResponse(flag, 5)
+    order = ModelOrder.objects.get(id=order.id)
+    position = ModelPosition.objects.get(id=position.id)
+    assert order.state == 'finish'
+    assert position.state == 'close'
+    print 'position.closePrice =', position.closePrice
+    print 'order.closePrice =', order.closePrice
+    assert position.closePrice
+    assert order.closePrice
 
 
 @attr('ctp')
