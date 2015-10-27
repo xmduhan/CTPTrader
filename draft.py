@@ -25,6 +25,7 @@
 
 # ---------------------------------------------
 1、修改waitForResponse的参数为表达式
+1、完成测试用例test_ctp_trader_clean_self
 1、在comhelper中实现getInstrumentLimitPrice
 
 ----------------------------------------------------------
