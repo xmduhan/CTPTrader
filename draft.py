@@ -18,12 +18,14 @@
 1、编写测试用例
 1、完成Trader中查询头寸和查询报单的实现(ok)
 1、在SimulateTrader不应该重新构造变量xxxOrderList，应该直接中数据取(ok)
+1、在test_ctp_trader中尝试实现一个waitForResponse()代替循环(ok)
+1、准备实验环境,构造一个可以打开和关闭头寸的脚本准备(ok)
+1、CallbackManager应该增加个单独文件,不应该放在comhelper.py(ok)
+1、实现CTPTrader的打开和关闭头寸(ok)
 
 # ---------------------------------------------
-1、准备实验环境,构造一个可以打开和关闭头寸的脚本准备
+1、修改waitForResponse的参数为表达式
 1、在comhelper中实现getInstrumentLimitPrice
-1、在test_ctp_trader中尝试实现一个waitForResponse()代替循环
-1、CallbackManager应该增加个单独文件,不应该放在comhelper.py
 
 ----------------------------------------------------------
 

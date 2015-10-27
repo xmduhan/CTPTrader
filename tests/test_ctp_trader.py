@@ -8,6 +8,7 @@ from comhelper import getInstrumentLimitPrice
 from comhelper import waitForResponse
 from nose.plugins.attrib import attr
 from database.models import ModelOrder, ModelPosition
+import psutil
 
 frontAddress = None
 brokerID = None
@@ -40,11 +41,14 @@ def test_ctp_trader_clean_self():
     """
     测试CTPTrader可以进行对象清理
     """
+    process = psutil.Process()
+    children = [child.pid for child in process.children()]
+    count = len(children)
     trader = CTPTrader(frontAddress, brokerID, userID, password)
     assert trader
+    children = [child.pid for child in process.children()]
+    assert len(children) == count + 1
     trader = None
-    assert False
-
 
 @attr('ctp')
 def test_open_position_and_close():
@@ -74,8 +78,6 @@ def test_open_position_and_close():
     assert position.state == 'open'
     assert position.openPrice
     assert order.openPrice
-    print 'position.openPrice =', position.openPrice
-    print 'order.openPrice =', order.openPrice
 
     # 尝试关闭头寸
     flag = []
@@ -88,10 +90,31 @@ def test_open_position_and_close():
     position = ModelPosition.objects.get(id=position.id)
     assert order.state == 'finish'
     assert position.state == 'close'
-    print 'position.closePrice =', position.closePrice
-    print 'order.closePrice =', order.closePrice
     assert position.closePrice
     assert order.closePrice
+
+
+@attr('ctp')
+def test_open_position_with_error_args():
+    """
+    测试使用错误的参数去打开头寸
+    """
+    def onOpenPositionError(order, errorId, errorMsg, position):
+        flag.append([order, errorId, errorMsg, position])
+
+    trader = CTPTrader(frontAddress, brokerID, userID, password)
+    trader.bind('onOpenPositionError', onOpenPositionError)
+
+    flag = []
+    order = trader.openPosition(instrumentId, 'buy', 0)
+    position = order.position
+    assert order.state == 'insert'
+    assert position.state == 'preopen'
+    waitForResponse(flag, 5)
+    order = ModelOrder.objects.get(id=order.id)
+    position = ModelPosition.objects.get(id=position.id)
+    assert order.state == 'error'
+    assert position.state == 'error'
 
 
 @attr('ctp')

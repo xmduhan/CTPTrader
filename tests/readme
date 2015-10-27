@@ -1,6 +1,8 @@
 由于test_ctp_trader测试用例的执行可能导致真实交易发生,从而导致资金损失,所以该测试用例被设置成默认不执行.
 如果确实需要执行可使用以下命令来执行:
+python manage.py test tests.test_ctp_trader:test_ctp_trader_clean_self
 python manage.py test tests.test_ctp_trader:test_open_position_and_close
+python manage.py test tests.test_ctp_trader:test_open_position_with_error_args
 python manage.py test tests.test_ctp_trader:test_open_limit_and_cancel
 python manage.py test tests.test_ctp_trader:test_open_position_with_stop_price
 python manage.py test tests.test_ctp_trader:test_open_posotion_with_profit_price

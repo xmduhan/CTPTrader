@@ -712,6 +712,19 @@ class CTPTrader(Trader):
         errorMsg = kwargs['RspInfo']['ErrorMsg']
         print 'OnRspOrderInsert() : ErrorId=%d, ErrorMsg=%s' % (errorId, errorMsg)
 
+        # 读取CTP接口的返回数据
+        data = kwargs['Data']
+        orderRef = data['OrderRef']
+        print data
+
+        # 关联出原始报单对象和头寸信息
+        orderId = int(orderRef)
+        order = ModelOrder.objects.get(id=orderId)
+        position = order.position
+
+        # 触发出错事件
+        self.onOpenPositionError(order, errorId, errorMsg, position)
+
     def __OnErrRtnOrderInsert(self, **kwargs):
         """
         报单出错回报
