@@ -5,6 +5,15 @@ import django
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from time import sleep
+import pyctp
+
+
+frontAddress = os.environ.get('CTP_FRONT_ADDRESS')
+mdFrontAddress = os.environ.get('CTP_MD_FRONT_ADDRESS')
+brokerID = os.environ.get('CTP_BROKER_ID')
+userID = os.environ.get('CTP_USER_ID')
+password = os.environ.get('CTP_PASSWORD')
+assert frontAddress and mdFrontAddress and brokerID and userID and password
 
 
 def getProjectPath():
@@ -36,11 +45,28 @@ def getDefaultInstrumentID(months=1):
     return datetime.strftime(datetime.now() + relativedelta(months=months), "IF%y%m")
 
 
-def getInstrumentLimitPrice():
+def getInstrumentPrice(instrumentId):
     """
-    获取品种的最高和最低限价
+    获取品种的价格信息
+    instrumentId 要查询的品种代码
+    返回: 品种的最新价格信息字典结构
     """
-    return 0, 0
+    result = []
+    flag = []
+
+    def OnRspQryDepthMarketData(**kwargs):
+        result.append(kwargs['Data'])
+        if kwargs['IsLast'] == True:
+            flag.append(1)
+
+    global frontAddress, brokerID, userID, password
+    trader = pyctp.Trader(frontAddress, brokerID, userID, password)
+    trader.bind(pyctp.callback.OnRspQryDepthMarketData, OnRspQryDepthMarketData)
+    data = pyctp.struct.CThostFtdcQryDepthMarketDataField()
+    data.InstrumentID = getDefaultInstrumentID()
+    trader.ReqQryDepthMarketData(data)
+    wait(lambda: len(flag) > 0)
+    return result[0]
 
 
 def orderId2Ref(orderId):

@@ -1,19 +1,15 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-import os
 from trader import CTPTrader
 from comhelper import getDefaultInstrumentID
-from comhelper import getInstrumentLimitPrice
+from comhelper import getInstrumentPrice
+from comhelper import frontAddress, brokerID, userID, password
 from comhelper import wait
 from nose.plugins.attrib import attr
 from database.models import ModelOrder, ModelPosition
 import psutil
 
-frontAddress = None
-brokerID = None
-userID = None
-password = None
 
 instrumentId = None
 buyLimitPrice = 0
@@ -24,16 +20,10 @@ def setup():
     """
     测试初始化操作
     """
-    global frontAddress, brokerID, userID, password
-    frontAddress = os.environ.get('CTP_FRONT_ADDRESS')
-    brokerID = os.environ.get('CTP_BROKER_ID')
-    userID = os.environ.get('CTP_USER_ID')
-    password = os.environ.get('CTP_PASSWORD')
-    assert frontAddress and brokerID and userID and password
-
     global instrumentId, buyLimitPrice, sellLimitPrice
     instrumentId = getDefaultInstrumentID()
-    buyLimitPrice, sellLimitPrice = getInstrumentLimitPrice()
+    priceData = getInstrumentPrice(instrumentId)
+    assert priceData
 
 
 @attr('ctp')
