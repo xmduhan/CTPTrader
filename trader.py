@@ -737,11 +737,25 @@ class _CTPTrader(Trader):
         """
         订单状态修改回报信息
         """
+        # 读取CTP接口的返回数据
         data = kwargs['Data']
         orderStatus = data['OrderStatus']
         statusMsg = data['StatusMsg']
+        orderRef = data['OrderRef']
+
+        # 关联出原始报单对象和头寸信息
+        orderId = int(orderRef)
+        order = ModelOrder.objects.get(id=orderId)
+        position = order.position
+
         print 'OnRtnOrder() : OrderStatus=%s, StatusMsg=%s' % (orderStatus, statusMsg)
         print data
+        if orderStatus not in ['0', 'a']:
+            # TODO: 这个地方的错误代码要如何返回
+            errorId = -1
+            errorMsg = "%s:%s" % (orderStatus, statusMsg)
+            # 触发出错事件
+            self.onOpenPositionError(order, errorId, errorMsg, position)
 
     def __OnRtnTrade(self, **kwargs):
         """
