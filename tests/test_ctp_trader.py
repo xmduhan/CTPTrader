@@ -23,7 +23,7 @@ def setup():
     global instrumentId, buyLimitPrice, sellLimitPrice
     instrumentId = getDefaultInstrumentId()
     priceData = getInstrumentPrice(instrumentId)
-    assert priceData
+    print priceData
 
 
 @attr('ctp')
