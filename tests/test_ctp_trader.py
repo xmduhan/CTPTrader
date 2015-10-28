@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 from trader import CTPTrader
-from comhelper import getDefaultInstrumentID
+from comhelper import getDefaultInstrumentId
 from comhelper import getInstrumentPrice
 from comhelper import frontAddress, brokerID, userID, password
 from comhelper import wait
@@ -21,7 +21,7 @@ def setup():
     测试初始化操作
     """
     global instrumentId, buyLimitPrice, sellLimitPrice
-    instrumentId = getDefaultInstrumentID()
+    instrumentId = getDefaultInstrumentId()
     priceData = getInstrumentPrice(instrumentId)
     assert priceData
 

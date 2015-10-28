@@ -38,7 +38,7 @@ def setDjangoEnvironment():
         django.setup()
 
 
-def getDefaultInstrumentID(months=1):
+def getDefaultInstrumentId(months=1):
     """
     获取一个可用的交易品种ID
     """
@@ -63,7 +63,7 @@ def getInstrumentPrice(instrumentId):
     trader = pyctp.Trader(frontAddress, brokerID, userID, password)
     trader.bind(pyctp.callback.OnRspQryDepthMarketData, OnRspQryDepthMarketData)
     data = pyctp.struct.CThostFtdcQryDepthMarketDataField()
-    data.InstrumentID = getDefaultInstrumentID()
+    data.InstrumentID = getDefaultInstrumentId()
     trader.ReqQryDepthMarketData(data)
     wait(lambda: len(flag) > 0)
     return result[0]

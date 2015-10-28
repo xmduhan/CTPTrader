@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 from trader import Trader
-from comhelper import getDefaultInstrumentID
+from comhelper import getDefaultInstrumentId
 from database.models import ModelOrder, ModelPosition
 
 
@@ -26,7 +26,7 @@ def test_open_position():
     trader.bind('onPositionOpened', onPositionOpened)
 
     # 尝试进行打开头寸报单
-    order = trader.openPosition(getDefaultInstrumentID(), 'buy', 1)
+    order = trader.openPosition(getDefaultInstrumentId(), 'buy', 1)
     assert isinstance(order, ModelOrder)
     assert order.id is not None
     assert order.state == 'insert'
@@ -70,7 +70,7 @@ def test_open_position_error():
     trader = Trader()
     trader.bind('onOpenPositionError', onOpenPositionError)
     # 尝试打开头寸的报单
-    order = trader.openPosition(getDefaultInstrumentID(), 'buy', 1)
+    order = trader.openPosition(getDefaultInstrumentId(), 'buy', 1)
     position = order.position
 
     # 模拟打开头寸出错的情况
@@ -102,7 +102,7 @@ def test_close_position():
     trader = Trader()
     trader.bind('onPositionClosed', onPositionClosed)
     # 创建一个头寸供关闭使用
-    openOrder = trader.openPosition(getDefaultInstrumentID(), 'buy', 1)
+    openOrder = trader.openPosition(getDefaultInstrumentId(), 'buy', 1)
     position = openOrder.position
     trader.onPositionOpened(openOrder, position)
     assert position.state == 'open'
@@ -151,7 +151,7 @@ def test_close_position_error():
     trader = Trader()
     trader.bind('onClosePositionError', onClosePositionError)
     # 创建一个头寸并关闭它
-    openOrder = trader.openPosition(getDefaultInstrumentID(), 'buy', 1)
+    openOrder = trader.openPosition(getDefaultInstrumentId(), 'buy', 1)
     position = openOrder.position
     trader.onPositionOpened(openOrder, position)
     assert position.state == 'open'
@@ -186,7 +186,7 @@ def test_open_and_close_position_with_limit_price():
 
     # 打开头寸
     order = trader.openPosition(
-        instrumentId=getDefaultInstrumentID(),
+        instrumentId=getDefaultInstrumentId(),
         direction='buy',
         volume=1,
         openLimitPrice=openLimitPrice
@@ -229,7 +229,7 @@ def test_set_stop_and_profit_price_success():
 
     # 打开头寸
     order0 = trader.openPosition(
-        instrumentId=getDefaultInstrumentID(),
+        instrumentId=getDefaultInstrumentId(),
         direction='buy',
         volume=1,
         stopPrice=stopPrice0,
@@ -295,7 +295,7 @@ def test_set_stop_and_profit_price_fail():
 
     # 打开头寸
     order0 = trader.openPosition(
-        instrumentId=getDefaultInstrumentID(),
+        instrumentId=getDefaultInstrumentId(),
         direction='buy',
         volume=1,
         stopPrice=stopPrice0,
@@ -365,7 +365,7 @@ def test_cancel_order_success():
 
     # 尝试创建头寸
     toOrder = trader.openPosition(
-        instrumentId=getDefaultInstrumentID(),
+        instrumentId=getDefaultInstrumentId(),
         direction='buy',
         volume=1,
         openLimitPrice=openLimitPrice
@@ -399,7 +399,7 @@ def test_cancel_order_fail():
 
     # 尝试创建头寸
     toOrder = trader.openPosition(
-        instrumentId=getDefaultInstrumentID(),
+        instrumentId=getDefaultInstrumentId(),
         direction='buy',
         volume=1,
         openLimitPrice=openLimitPrice

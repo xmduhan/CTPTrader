@@ -17,7 +17,7 @@ def setup():
     account = ModelAccount.objects.get(id=1)
     trader = Trader(account)
 
-def getDefaultInstrumentID():
+def getDefaultInstrumentId():
     '''
     获得一个保证可以使用的合同代码
     '''

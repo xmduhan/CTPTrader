@@ -2,7 +2,7 @@
 # encoding: utf-8
 from __future__ import division
 from trader import SimulateTrader
-from comhelper import getDefaultInstrumentID
+from comhelper import getDefaultInstrumentId
 from database.models import ModelOrder, ModelPosition, ModelStrategyExecuter, ModelDataGenerator
 import error
 
@@ -19,14 +19,14 @@ def setup():
     modelDataGenerator.code = 'TestGenerator1'
     modelDataGenerator.name = u'测试数据生成器1'
     modelDataGenerator.dataSource = 'database'
-    modelDataGenerator.instrumentIdList = '["%s"]' % getDefaultInstrumentID()
+    modelDataGenerator.instrumentIdList = '["%s"]' % getDefaultInstrumentId()
     modelDataGenerator.save()
 
     # 创建一个测试使用的策略执行器
     modelStrategyExecuter.code = 'TestExecuter1'
     modelStrategyExecuter.name = u'测试执行器1'
     modelStrategyExecuter.dataGenerator = modelDataGenerator
-    modelStrategyExecuter.instrumentIdList = '["%s"]' % getDefaultInstrumentID()
+    modelStrategyExecuter.instrumentIdList = '["%s"]' % getDefaultInstrumentId()
     modelStrategyExecuter.traderClass = 'SimulateTrader'
     modelStrategyExecuter.save()
 
@@ -36,7 +36,7 @@ def test_open_position():
     测试打开头寸
     """
     trader = SimulateTrader()
-    instrumentId = getDefaultInstrumentID()
+    instrumentId = getDefaultInstrumentId()
     ask = 100
     bid = 101
 
@@ -72,7 +72,7 @@ def test_open_position_with_limit_price():
     测试使用限价打开头寸
     """
     trader = SimulateTrader()
-    instrumentId = getDefaultInstrumentID()
+    instrumentId = getDefaultInstrumentId()
 
     # 尝试创建头(buy)寸
     order = trader.openPosition(instrumentId, 'buy', 1, openLimitPrice=100)
@@ -102,7 +102,7 @@ def test_close_position():
     测试关闭头寸
     """
     trader = SimulateTrader()
-    instrumentId = getDefaultInstrumentID()
+    instrumentId = getDefaultInstrumentId()
     ask = 90
     bid = 95
 
@@ -131,7 +131,7 @@ def test_close_position_with_limit_price():
     测试使用限价关闭头寸
     """
     trader = SimulateTrader()
-    instrumentId = getDefaultInstrumentID()
+    instrumentId = getDefaultInstrumentId()
     ask = 90
     bid = 95
 
@@ -167,7 +167,7 @@ def test_cancel_order():
     测试取消挂单
     """
     trader = SimulateTrader()
-    instrumentId = getDefaultInstrumentID()
+    instrumentId = getDefaultInstrumentId()
 
     # 创建一个挂单供撤单使用
     order = trader.openPosition(instrumentId, 'buy', openLimitPrice=100)
@@ -223,7 +223,7 @@ def test_open_position_with_stop_price():
     测试设置止损
     """
     trader = SimulateTrader()
-    instrumentId = getDefaultInstrumentID()
+    instrumentId = getDefaultInstrumentId()
     stopPrice = 90
 
     # 创建一个头寸并设置了止损
@@ -247,7 +247,7 @@ def test_open_position_with_profit_price():
     测试打开头寸的时候同时设置止盈信息
     """
     trader = SimulateTrader()
-    instrumentId = getDefaultInstrumentID()
+    instrumentId = getDefaultInstrumentId()
     profitPrice = 110
     # 创建一个头寸并设置了止盈
     order = trader.openPosition(instrumentId, 'buy', profitPrice=profitPrice)
@@ -270,7 +270,7 @@ def test_set_stop_price():
     测试设置止盈
     """
     trader = SimulateTrader()
-    instrumentId = getDefaultInstrumentID()
+    instrumentId = getDefaultInstrumentId()
 
     # 创建一个头寸
     order = trader.openPosition(instrumentId, 'sell')
@@ -299,7 +299,7 @@ def test_set_profit_price():
     测试设置止盈
     """
     trader = SimulateTrader()
-    instrumentId = getDefaultInstrumentID()
+    instrumentId = getDefaultInstrumentId()
 
     # 创建一个头寸
     order = trader.openPosition(instrumentId, 'sell')
@@ -330,7 +330,7 @@ def test_working_thread_running():
     global modelStrategyExecuter, modelDataGenerator
 
     trader = SimulateTrader(modelStrategyExecuter)
-    instrumentId = getDefaultInstrumentID()
+    instrumentId = getDefaultInstrumentId()
 
     # 启动工作线程
     trader.start()
