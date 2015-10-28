@@ -12,18 +12,16 @@ import psutil
 
 
 instrumentId = None
-buyLimitPrice = 0
-sellLimitPrice = 0
+priceData = None
 
 
 def setup():
     """
     测试初始化操作
     """
-    global instrumentId, buyLimitPrice, sellLimitPrice
+    global instrumentId, priceData
     instrumentId = getDefaultInstrumentId()
     priceData = getInstrumentPrice(instrumentId)
-    print priceData
 
 
 @attr('ctp')
