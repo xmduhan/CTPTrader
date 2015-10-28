@@ -369,6 +369,18 @@ class ModelOrder(models.Model):
         ordering = ['finishTime']
 
 
+class ModelCTPOrderInfo(models.Model):
+    """
+    CTP订单的附加信息
+    NOTE: 附加信息用于撤单和订单修改使用
+    """
+    order = models.OneToOneField('ModelOrder')
+    RequestID = models.IntegerField(u'请求编号')
+    SessionID = models.IntegerField(u'会话编号')
+    ExchangeID = models.CharField(u'交易所代码', max_length=50)
+    OrderSysID = models.CharField(u'系统报单编号', max_length=50)
+
+
 class ModelTest(models.Model):
     """
     进行多线程测试使用
